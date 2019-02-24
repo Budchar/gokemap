@@ -21,7 +21,6 @@ ROOT_DIR = os.path.dirname(BASE_DIR) #/home/budcha/gokemap
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'cj4xeeux6*nit%38&3(*l%#ad2^y7i*08vs_mq&hwnb21m5*ie'
 SECRET_KEY = os.path.join(BASE_DIR, 'sk.cnf')
 
 # SECURITY WARNING: don't run with debug turned on in production!
