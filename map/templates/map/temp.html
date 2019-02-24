@@ -1,0 +1,56 @@
+    <div class="raid_report">
+        <h4>레이드 제보</h4>
+        <form action="{% url 'map:posted' %}" method="POST" id="raid_report">
+            {%csrf_token%}
+            {{raid_form.as_p}}
+            <input type="submit" value="제보">
+        </form>
+    </div>
+    <div class="raid_board">
+        <h4>레이드 현황</h4>
+        <table>
+            <caption>레이드 현황</caption>
+            <colgroup></colgroup>
+            <thead>
+                <th>위치</th>
+                <th>보스</th>
+                <th>시작시간</th>
+                <th>종료시간</th>
+            </thead>
+            <tbody>
+                {% for raid_on in raid_on_list %}
+                <tr>
+                    <td>{{raid_on.gym.name}}</td>
+                    <td>{{raid_on.poke}}</td>
+                    <td>{{raid_on.s_time|time:"H:i"}}</td>
+                    <td>{{raid_on.e_time|time:"H:i"}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="party">
+    <form action="{% url 'map:p_posted' %}" method="POST" id="party_report">
+    {%csrf_token%}
+    {{party_form}}
+    <input type="submit" value="만들기">
+    </form>
+    </div>
+    <div class="party_board">
+    <table>
+    <caption>파티 현황</caption>
+    <colgroup></colgroup>
+    <thead>
+    <th>파티</th>
+    <th>시간</th>
+    </thead>
+    <tbody>
+    {% for party in party_list %}
+    <tr>
+    <td>{{party.raid}}</td>
+    <td>{{party.p_time|time:"H:i"}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
