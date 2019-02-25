@@ -61,7 +61,7 @@ class gym(models.Model):
         else:
             if (timezone.now() + timedelta(minutes=-1) <= self.raid_ing.s_time):
                 # 시작 전엔 알
-                return ["r", str(self.raid_ing.poke.Tier)]
+                return ["r", str(self.raid_ing.tier)]
                 # 시작 후엔 포켓몬
             else: return ["p", str(self.raid_ing.poke.poke.id)]
 
