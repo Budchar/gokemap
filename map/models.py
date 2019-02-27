@@ -3,12 +3,17 @@ from django.db import models
 from datetime import timedelta, datetime
 from django.utils import timezone
 
-type_choice = {'normal': 'nm', 'fire': 'fr', 'water': 'wt', 'grass': 'grs', 'electric': 'et',
-               'ice': 'ice', 'fighting': 'ft', 'poison': 'ps', 'ground': 'gr', 'flying': 'fl', 'psychic': 'psy',
-               'bug': 'bug', 'rock': 'r', 'ghost': 'gst', 'dragon': 'dra', 'dark': 'dk', 'steel': 'stl', 'fairy': 'fry'}
-
 
 # Create your models here.
+class user(models.Model):
+    kid = models.CharField(max_length=100)
+    nick = models.CharField(max_length=15)
+    val = models.IntegerField(blank=True, null=True)
+    mys = models.IntegerField(blank=True, null=True)
+    ins = models.IntegerField(blank=True, null=True)
+    group = models.IntegerField(default=1)
+
+
 class pokemon(models.Model):
     name = models.CharField(max_length=20, default="미정")
     type_1 = models.CharField(max_length=4, default="미정")
@@ -19,14 +24,20 @@ class pokemon(models.Model):
     c_rate = models.IntegerField(default=-1)
     r_rate = models.IntegerField(default=-1)
 
+    type_choice = {'normal': 'nm', 'fire': 'fr', 'water': 'wt', 'grass': 'grs', 'electric': 'et',
+                   'ice': 'ice', 'fighting': 'ft', 'poison': 'ps', 'ground': 'gr', 'flying': 'fl', 'psychic': 'psy',
+                   'bug': 'bug', 'rock': 'r', 'ghost': 'gst', 'dragon': 'dra', 'dark': 'dk', 'steel': 'stl',
+                   'fairy': 'fry'}
+
     def __str__(self):
         return self.name
 
     def cp_cal(self, a, d, s, l):
+        cmp_dic = {20: 0.59740001, 25: 0.667934}
         att = self.atk + a
         deff = (self.df + d) ** 0.5
         st = (self.stm + s) ** 0.5
-        cmp = 0.7903 ** 2
+        cmp = cmp_dic.get(l) ** 2
         cp = (att * deff * st) * cmp / 10
         return cp
 
@@ -46,6 +57,7 @@ class raid(models.Model):
 
 class gym(models.Model):
     name = models.CharField(max_length=50, default="미정")
+    nick = models.CharField(max_length=10, default="미정")
     is_pkstp = models.BooleanField(default=True)  # 포켓스탑이면 1(true) 체육관이면 0(false)
     x_cdn = models.CharField(max_length=20, default=-1)
     y_cdn = models.CharField(max_length=20, default=-1)
@@ -69,6 +81,7 @@ class gym(models.Model):
     def n(self):
         return '<p>{}</p>'.format(self.name)
 
+
 class raid_ing(models.Model):
     gym = models.OneToOneField(gym, on_delete=models.DO_NOTHING)
     poke = models.ForeignKey(raid, on_delete=models.DO_NOTHING, blank=True, null=True)
@@ -85,13 +98,25 @@ class raid_ing(models.Model):
             return str(self.gym) + " " + str(self.poke)
         else: return "-1"
 
+
 class party(models.Model):
     raid = models.ForeignKey(raid_ing, on_delete=models.CASCADE)
-    p_time = models.DateTimeField(null=True)
+    time = models.DateTimeField(null=True)
+    description = models.TextField(blank=True, null=True, default="화력 미달시 펑")
+
+
+class partyboard(models.Model):
+    party = models.ForeignKey(party, on_delete=models.CASCADE)
+    user = models.ForeignKey(user, on_delete=models.CASCADE)
+    val = models.IntegerField(blank=True, null=True)
+    mys = models.IntegerField(blank=True, null=True)
+    ins = models.IntegerField(blank=True, null=True)
+    tag = models.TextField(blank=True, null=True)
+    arrived = models.BooleanField(default=False)
+
 
 class event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-
