@@ -1,10 +1,7 @@
 import datetime
 import json
-import copy
 from datetime import timedelta
-from django.core import serializers
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import raid_ing, raid
@@ -46,11 +43,11 @@ def make_simple_text_response(text):
 def get_resp(params, raid_ing_object, stt):
     if 'raid_level' in params:
         raid_ing_object.update(poke=None, tier=params['raid_level']['value'], s_time=stt)
-        return make_simple_text_response('raid level receive ok')
-    if 'raid_poke_name' in params:
+        return make_simple_text_response(get_raid_board())
+    elif 'raid_poke_name' in params:
         poke = raid.objects.filter(poke__name=params['raid_poke_name']['value'])
         raid_ing_object.update(poke=poke[0].id, tier=poke[0].Tier, s_time=stt)
-        return make_simple_text_response('raid poke receive ok')
+        return make_simple_text_response(get_raid_board())
 
 
 @csrf_exempt
@@ -58,33 +55,36 @@ def post(request):
     json_str = request.body.decode('utf-8')
     received_json_data = json.loads(json_str)
     params = received_json_data['action']['detailParams']
-    date = list(map(int, params['date_time']['value']['value'][0:9].split('-')))
-    time = list(map(int, params['date_time']['value']['value'][11:18].split(':')))
+    dt = json.loads(params['sys_plugin_datetime']['value'])['value']
+    date = list(map(int, dt[0:10].split('-')))
+    time = list(map(int, dt[11:19].split(':')))
     stt = datetime.datetime(date[0], date[1], date[2], time[0], time[1], 0, 0)
     raid_ing_object = raid_ing.objects.filter(gym__name=params['gym_name']['value'])
     return JsonResponse(get_resp(params, raid_ing_object, stt))
 
 
-def get_raid_board(raid_bd):
+def get_raid_board():
+    raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by('s_time')
     text = ""
-    for raid in raid_bd:
+    for board in raid_bd:
         raid_obj = ""
-        if raid.poke:
-            raid_obj += str(raid.poke)
+        if board.poke:
+            raid_obj += str(board.poke)
         else:
-            raid_obj += str(raid.tier) + "성"
-        text += str(raid.s_time.strftime('%H:%M')) + "~" + str((raid.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(raid.gym.nick) + " " + raid_obj + "\n"
+            raid_obj += str(board.tier) + "성"
+        text += str(board.s_time.strftime('%H:%M')) + "~" + str((board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(board.gym.nick) + " " + raid_obj + "\n"
+
     if text == "":
-        text += "현재 알려진 레이드가 없습니다! 제보하시겠어요?"
-    return text
+        return "현재 알려진 레이드가 없습니다! 제보하시겠어요?"
+    else: return text[:-1]
 
 
 @csrf_exempt
 def board(request):
-    raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by('s_time')
-    return JsonResponse(make_simple_text_response(get_raid_board(raid_bd)))
+    return JsonResponse(make_simple_text_response(get_raid_board()))
 
 
+@csrf_exempt
 def mod(request):
     #json data decode
     json_str = request.body.decode('utf-8')
@@ -93,12 +93,13 @@ def mod(request):
     # json 파일에서 입력값을 전달해주는 param 접근
     params = received_json_data['action']['detailParams']
     raid_ing_object = raid_ing.objects.filter(gym__name=params['gym_name']['value'])
-    if 'date_time' in params:
-        mod_date = list(map(int, params['date_time']['value']['value'][0:9].split('-')))
-        mod_time = list(map(int, params['date_time']['value']['value'][11:18].split(':')))
+    if 'sys_plugin_datetime' in params:
+        dt = json.loads(params['sys_plugin_datetime']['value'])['value']
+        mod_date = list(map(int, dt[0:10].split('-')))
+        mod_time = list(map(int, dt[11:19].split(':')))
         st = datetime.datetime(mod_date[0], mod_date[1], mod_date[2], mod_time[0], mod_time[1], 0, 0)
         raid_ing_object.update(s_time=st)
-    if 'raid_poke_name' in params:
+    elif 'raid_poke_name' in params:
         poke = raid.objects.filter(poke__name=params['raid_poke_name']['value'])
         raid_ing_object.update(poke=poke[0].id, tier=poke[0].Tier)
-    return JsonResponse(make_simple_text_response("레이드가 정정되었습니다."))
+    return JsonResponse(make_simple_text_response(get_raid_board()))

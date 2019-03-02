@@ -7,7 +7,7 @@ from django.views import generic
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import *
+from .models import raid, pokemon, raid_ing, gym, party
 from .utils import Calendar
 from .forms import raid_post_form, party_post_form
 
@@ -26,14 +26,13 @@ class IndexView(generic.ListView):
             'raid_list': raid.objects.order_by('id'),
             'pokemon_list': pokemon.objects.all(),
             'raid_on_list': raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))),
-            'party_list': party.objects.filter(p_time__gte=(timezone.now())),
+            'party_list': party.objects.filter(time__gte=timezone.now()),
             # 'raid_form': raid_post_form(),
             # 'party_form': party_post_form(),
         })
         return context
 
     def get_queryset(self):
-        """Return the last five published questions."""
         return gym.objects.all()
 
 
@@ -41,8 +40,8 @@ def get_date(req_day):
     if req_day:
         year, month = (int(x) for x in req_day.split('-'))
         day = 1
-        return datetime.date(year, month, day)
-    return datetime.today()
+        return datetime.datetime.date(year, month, day)
+    return datetime.datetime.today()
 
 
 # def raid_post(request):

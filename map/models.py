@@ -50,6 +50,7 @@ class research(models.Model):
 class raid(models.Model):
     Tier = models.IntegerField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5)], default=0)
     poke = models.ForeignKey(pokemon, on_delete=models.DO_NOTHING, db_constraint=False, default=-1, related_name='raid')
+    ison = models.BooleanField(default=False)
 
     def __str__(self):
         return self.poke.name
@@ -58,7 +59,6 @@ class raid(models.Model):
 class gym(models.Model):
     name = models.CharField(max_length=50, default="미정")
     nick = models.CharField(max_length=10, default="미정")
-    is_pkstp = models.BooleanField(default=True)  # 포켓스탑이면 1(true) 체육관이면 0(false)
     x_cdn = models.CharField(max_length=20, default=-1)
     y_cdn = models.CharField(max_length=20, default=-1)
     geom = PointField(null=True, blank=True)
@@ -80,6 +80,17 @@ class gym(models.Model):
     @property
     def n(self):
         return '<p>{}</p>'.format(self.name)
+
+
+class pokestop(models.Model):
+    name = models.CharField(max_length=50, default="미정")
+    nick = models.CharField(max_length=10, default="미정")
+    x_cdn = models.CharField(max_length=20, default=-1)
+    y_cdn = models.CharField(max_length=20, default=-1)
+    geom = PointField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class raid_ing(models.Model):
