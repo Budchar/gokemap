@@ -35,9 +35,14 @@ class req_rsp:
 @csrf_exempt
 def user_enroll(request):
     req = req_rsp(request)
-    request_user = user.objects.get_or_create(kid=req.user_id)
-    user.objects.update(kid=request_user[0].kid, nick=req.params['user_name']['value'])
-    return JsonResponse(make_simple_text_response(req.params['user_name']['value']+"님 안녕하세요"))
+    request_user = user.objects.filter(kid=req.user_id)
+    #유저 닉네임이 있다면
+    if request_user:
+        request_user.update(nick=req.params['user_name']['value'])
+        return JsonResponse(make_simple_text_response(request_user[0].nick+"(으)로 이름을 바꾸셨군요"))
+    else:
+        user.objects.create(kid=req.user_id, nick=req.params['user_name']['value'])
+        return JsonResponse(make_simple_text_response(req.params['user_name']['value']+"님 안녕하세요"))
 
 
 @csrf_exempt
