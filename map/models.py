@@ -131,3 +131,8 @@ class event(models.Model):
     description = models.TextField()
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+
+class temp(models.Model):
+    date = models.DateField()
+    description = models.TextField()
