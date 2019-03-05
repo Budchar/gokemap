@@ -88,4 +88,5 @@ def mod(request):
     elif 'raid_poke_name' in params:
         poke = raid.objects.filter(poke__name=params['raid_poke_name']['value'])
         raid_ing_object.update(poke=poke[0].id, tier=poke[0].Tier)
+
     return JsonResponse(make_simple_text_response(get_raid_board()))

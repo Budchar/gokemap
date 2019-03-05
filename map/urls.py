@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
-from . import views, skills_raid, skills_user, skills_research
+from . import views, skills_raid, skills_user, skills_research, skills_party
 
 app_name = 'map'
 urlpatterns = [
@@ -15,6 +15,9 @@ urlpatterns = [
     url(r'^team_enroll/', skills_user.team_enroll),
     url(r'^research_post/', skills_research.post),
     url(r'^research_board/', skills_research.board),
+    url(r'^party_post/', skills_party.post),
+    url(r'^party_board/', skills_party.board),
+    url(r'^party_register/', skills_party.register),
     # path('posted/', views.raid_post, name='posted'),
     # path('party/', views.party_post, name='p_posted'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

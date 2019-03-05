@@ -36,7 +36,6 @@ class req_rsp:
 def user_enroll(request):
     req = req_rsp(request)
     request_user = user.objects.filter(kid=req.user_id)
-    #유저 닉네임이 있다면
     if request_user:
         request_user.update(nick=req.params['user_name']['value'])
         return JsonResponse(make_simple_text_response(request_user[0].nick+"(으)로 이름을 바꾸셨군요"))
