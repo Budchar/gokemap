@@ -43,19 +43,28 @@ def get_party_board():
             val_text = "🔥(총 " + str(val_num) + "명)\n"
             ins_text = "⚡(총 "+ str(ins_num) + "명)\n"
             mys_text = "❄(총 " + str(mys_num) + "명)\n"
-            for k, u in enumerate(users):
+            val_ord = 0
+            ins_ord = 0
+            mys_ord = 0
+            for u in users:
+                isarrived = " "
+                if u.arrived == 1:
+                    isarrived = " 도착"
                 if u.val > 0:
-                    val_text += str(k + 1) + ". " + str(u.user.nick)
+                    val_ord += 1
+                    val_text += str(val_ord) + ". " + str(u.user.nick) + isarrived + " " + str(u.tag)
                     if u.val > 1:
                         val_text += " +" + str(u.val-1)
                     val_text += '\n'
                 if u.ins > 0:
-                    ins_text += str(k + 1) + ". " + str(u.user.nick)
+                    ins_ord += 1
+                    ins_text += str(ins_ord) + ". " + str(u.user.nick) + isarrived + " " + str(u.tag)
                     if u.ins > 1:
                         ins_text += " +" + str(u.ins-1)
                     ins_text += '\n'
                 if u.mys > 0:
-                    mys_text += str(k + 1) + ". " + str(u.user.nick)
+                    mys_ord += 1
+                    mys_text += str(mys_ord) + ". " + str(u.user.nick) + isarrived + " " + str(u.tag)
                     if u.mys > 1:
                         mys_text += " +" + str(u.mys-1)
                     mys_text += '\n'
@@ -108,24 +117,84 @@ def register(request):
     req = req_rsp(request)
     party_ing = party.objects.filter(time__gte=datetime.datetime.now())
     party_num = int(req.params['party']['value'][1]) - 1
-    user_id = user.objects.filter(kid=req.user_id)[0]
+    if len(party_ing) < party_num + 1:
+        JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
+    user_id = user.objects.filter(kid=req.user_id)
+    if partyboard.objects.filter(party=party_ing[party_num], user=user_id):
+        JsonResponse(make_simple_text_response("이미 말씀하신 파티에 속해있는 상태입니다."))
     mys_num = int(req.params.get('mystic', {'value':'미0'})['value'][1])
     val_num = int(req.params.get('valor', {'value':'발0'})['value'][1])
     ins_num = int(req.params.get('instinct', {'value':'인0'})['value'][1])
+    user_tag = req.params['sys_text']['value']
+    if user_tag == "괜찮아요":
+        user_tag = ""
     if any([mys_num, val_num, ins_num]):
-        partyboard.objects.create(party=party_ing[party_num],user=user_id,val=val_num,mys=mys_num,ins=ins_num)
+        partyboard.objects.create(party=party_ing[party_num],tag=user_tag,user=user_id,val=val_num,mys=mys_num,ins=ins_num)
     elif any([user_id.val, user_id.mys, user_id.ins]):
-        partyboard.objects.create(party=party_ing[party_num],user=user_id,val=user_id.val,mys=user_id.mys,ins=user_id.ins)
+        partyboard.objects.create(party=party_ing[party_num],tag=user_tag,user=user_id,val=user_id.val,mys=user_id.mys,ins=user_id.ins)
     else:
         return JsonResponse(make_simple_text_response('제가 '+str(user_id.nick)+'님 팀을 아직 모르겠어요 \n"팟1 미1 참가"처럼 말씀하시거나 \n"내 팀은"이라고 말씀해주세요'))
-    return JsonResponse(make_simple_text_response((get_party_board())))
+    return JsonResponse(make_simple_text_response(get_party_board()))
 
 
 @csrf_exempt
-def mod(request):
-    return JsonResponse(make_simple_text_response("파티 정정"))
+def mod_time(request):
+    req = req_rsp(request)
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now())
+    party_num = int(req.params['party']['value'][1]) - 1
+    if len(party_ing) < party_num + 1:
+        JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
+    mod_party = party_ing[party_num]
+    dt = json.loads(req.params['sys_plugin_datetime']['value'])['value']
+    mod_date = list(map(int, dt[0:10].split('-')))
+    mod_time = list(map(int, dt[11:19].split(':')))
+    st = datetime.datetime(mod_date[0], mod_date[1], mod_date[2], mod_time[0], mod_time[1], 0, 0)
+    mod_party.update(time=st)
+    return JsonResponse(make_simple_text_response(get_party_board()))
 
 
 @csrf_exempt
-def out(request):
-    return JsonResponse(make_simple_text_response("이타치"))
+def mod_gym(request):
+    req = req_rsp(request)
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now())
+    party_num = int(req.params['party']['value'][1]) - 1
+    if len(party_ing) < party_num + 1:
+        JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
+    mod_party = party_ing[party_num]
+    gym_obj = raid_ing.objects.filter(gym__name=req.params['gym_name']['value']).first()
+    mod_party.update(raid=gym_obj)
+    return JsonResponse(make_simple_text_response(get_party_board()))
+
+
+@csrf_exempt
+def leave(request):
+    req = req_rsp(request)
+    user_id = user.objects.filter(kid=req.user_id).first()
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now())
+    party_num = int(req.params['party']['value'][1]) - 1
+    if party_ing:
+        user_in_party = partyboard.objects.filter(party=party_ing[party_num], user=user_id)
+        if user_in_party:
+            user_in_party.delete()
+            return JsonResponse(make_simple_text_response(get_party_board()))
+        else:
+            JsonResponse(make_simple_text_response("해당 파티에 속해있는 상태가 아닙니다."))
+    else:
+        return JsonResponse(make_simple_text_response("진행중인 파티가 없어요!"))
+
+
+@csrf_exempt
+def arrived(request):
+    req = req_rsp(request)
+    user_id = user.objects.filter(kid=req.user_id).first()
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now())
+    party_num = int(req.params['party']['value'][1]) - 1
+    if party_ing:
+        user_in_party = partyboard.objects.filter(party=party_ing[party_num], user=user_id)
+        if user_in_party:
+            user_in_party.update(arrived=1)
+            return JsonResponse(make_simple_text_response(get_party_board()))
+        else:
+            JsonResponse(make_simple_text_response("해당 파티에 속해있는 상태가 아닙니다."))
+    else:
+        return JsonResponse(make_simple_text_response("진행중인 파티가 없어요!"))

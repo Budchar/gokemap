@@ -18,6 +18,10 @@ urlpatterns = [
     url(r'^party_post/', skills_party.post),
     url(r'^party_board/', skills_party.board),
     url(r'^party_register/', skills_party.register),
+    url(r'^party_leave/', skills_party.leave),
+    url(r'^party_arrived/', skills_party.arrived),
+    url(r'^party_mod_time/', skills_party.mod_time),
+    url(r'^party_mod_gym/', skills_party.mod_gym),
     # path('posted/', views.raid_post, name='posted'),
     # path('party/', views.party_post, name='p_posted'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
