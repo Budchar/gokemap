@@ -26,13 +26,12 @@ def make_simple_text_response(text):
 
 
 def get_party_board():
-    output = ""
+    text = ""
     # 현재 진행중인 파티 query
     party_ing = party.objects.filter(time__gte=datetime.datetime.now())
     if party_ing:
         # i는 파티순서, p는 파티 오브젝트
         for i, p in enumerate(party_ing):
-            text = ""
             # 파티에 속해있는 유저들
             users = partyboard.objects.filter(party=p)
             text += "[팟" + str(i+1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.poke.poke) +"\n"
@@ -71,8 +70,7 @@ def get_party_board():
                         mys_text += " +" + str(u.mys-1)
                     mys_text += " " + u_tag + '\n'
             text += val_text+mys_text+ins_text+"\n" + str(p.description) + "\n\n"
-            output += make_simple_text_response(text)
-        return output
+        return text
     else:
         return "현재 진행중인 파티가 없습니다! 만들어보시는 건 어떨까요?"
 
