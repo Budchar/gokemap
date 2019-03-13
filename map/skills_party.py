@@ -50,25 +50,25 @@ def get_party_board():
                 u_tag = u.tag[0:15] if u.tag else " "
                 if u.val > 0:
                     val_ord += 1
-                    isarrived = " ✔" if u.arrived == 1 else str(val_ord)
+                    isarrived = "✔" if u.arrived == 1 else str(val_ord)
                     val_text += isarrived + ". " + str(u.user.nick)
                     if u.val > 1:
                         val_text += " +" + str(u.val-1)
-                    val_text += u_tag + '\n'
+                    val_text += " " + u_tag + '\n'
                 if u.ins > 0:
                     ins_ord += 1
-                    isarrived = " ✔" if u.arrived == 1 else str(ins_ord)
+                    isarrived = "✔" if u.arrived == 1 else str(ins_ord)
                     ins_text += isarrived + ". " + str(u.user.nick)
                     if u.ins > 1:
                         ins_text += " +" + str(u.ins-1)
-                    ins_text += u_tag + '\n'
+                    ins_text += " " + u_tag + '\n'
                 if u.mys > 0:
                     mys_ord += 1
-                    isarrived = " ✔" if u.arrived == 1 else str(mys_ord)
+                    isarrived = "✔" if u.arrived == 1 else str(mys_ord)
                     mys_text += isarrived + ". " + str(u.user.nick)
                     if u.mys > 1:
                         mys_text += " +" + str(u.mys-1)
-                    mys_text += u_tag + '\n'
+                    mys_text += " " + u_tag + '\n'
             text += val_text+mys_text+ins_text+"\n" + str(p.description) + "\n\n"
         return text
     else:
