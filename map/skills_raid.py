@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from .models import raid_ing, raid, temp
+from .models import raid_ing, raid
 
 
 def make_simple_text_response(text):

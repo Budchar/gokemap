@@ -1,9 +1,7 @@
 import datetime
 import json
-from datetime import timedelta
 from django.http import JsonResponse
 from django.db.models import Sum
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import party, raid_ing, partyboard, user
 
@@ -79,7 +77,6 @@ class req_rsp:
     def __init__(self, request):
         json_str = request.body.decode('utf-8')
         received_json_data = json.loads(json_str)
-        print(received_json_data)
         self.params = received_json_data['action']['detailParams']
         self.user_id = received_json_data['userRequest']['user']['id']
 
