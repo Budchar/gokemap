@@ -42,8 +42,9 @@ def post(request):
     else:
         return JsonResponse(make_simple_text_response("현재 리서치 제보는 몇몇분 한정으로 기능하고 있습니다."))
 
+
 @csrf_exempt
 def board(request):
-    research_bd = temp.objects.filter(date=(timezone.now().date()))
-    rsch = getattr(research_bd[0], "description", "오늘은 리서치가 아직 제보되지 않았네요 ㅠㅁㅠ")
+    research_bd = temp.objects.filter(date=(timezone.now().date())).first()
+    rsch = getattr(research_bd, "description", "오늘은 리서치가 아직 제보되지 않았네요 ㅠㅁㅠ")
     return JsonResponse(make_simple_text_response(rsch))

@@ -37,37 +37,38 @@ def get_party_board():
             text += "[팟" + str(i+1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.poke.poke) +"\n"
             text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,20))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,20))) +"\n"
             text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,25))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,25))) + "(날씨부스트)\n\n"
-            val_num = users.aggregate(Sum('val'))['val__sum']
-            ins_num = users.aggregate(Sum('ins'))['ins__sum']
-            mys_num = users.aggregate(Sum('mys'))['mys__sum']
-            val_text = "🔥(총 " + str(val_num) + "명)\n"
-            ins_text = "⚡(총 "+ str(ins_num) + "명)\n"
-            mys_text = "❄(총 " + str(mys_num) + "명)\n"
+            val_num = users.aggregate(Sum('val'))['val__sum'] if users else 0
+            ins_num = users.aggregate(Sum('ins'))['ins__sum'] if users else 0
+            mys_num = users.aggregate(Sum('mys'))['mys__sum'] if users else 0
+            val_text = "🔥(총 " + str(val_num) + "명)\n" if val_num > 0 else ""
+            ins_text = "⚡(총 "+ str(ins_num) + "명)\n" if ins_num > 0 else ""
+            mys_text = "❄(총 " + str(mys_num) + "명)\n" if mys_num > 0 else ""
             val_ord = 0
             ins_ord = 0
             mys_ord = 0
             for u in users:
-                isarrived = " "
-                if u.arrived == 1:
-                    isarrived = " 도착"
+                u_tag = u.tag[0:15] if u.tag else " "
                 if u.val > 0:
                     val_ord += 1
-                    val_text += str(val_ord) + ". " + str(u.user.nick) + isarrived + " " + str(u.tag)
+                    isarrived = " ✔" if u.arrived == 1 else str(val_ord)
+                    val_text += isarrived + ". " + str(u.user.nick)
                     if u.val > 1:
                         val_text += " +" + str(u.val-1)
-                    val_text += '\n'
+                    val_text += u_tag + '\n'
                 if u.ins > 0:
                     ins_ord += 1
-                    ins_text += str(ins_ord) + ". " + str(u.user.nick) + isarrived + " " + str(u.tag)
+                    isarrived = " ✔" if u.arrived == 1 else str(ins_ord)
+                    ins_text += isarrived + ". " + str(u.user.nick)
                     if u.ins > 1:
                         ins_text += " +" + str(u.ins-1)
-                    ins_text += '\n'
+                    ins_text += u_tag + '\n'
                 if u.mys > 0:
                     mys_ord += 1
-                    mys_text += str(mys_ord) + ". " + str(u.user.nick) + isarrived + " " + str(u.tag)
+                    isarrived = " ✔" if u.arrived == 1 else str(mys_ord)
+                    mys_text += isarrived + ". " + str(u.user.nick)
                     if u.mys > 1:
                         mys_text += " +" + str(u.mys-1)
-                    mys_text += '\n'
+                    mys_text += u_tag + '\n'
             text += val_text+mys_text+ins_text+"\n" + str(p.description) + "\n\n"
         return text
     else:
@@ -118,15 +119,15 @@ def register(request):
     party_ing = party.objects.filter(time__gte=datetime.datetime.now())
     party_num = int(req.params['party']['value'][1]) - 1
     if len(party_ing) < party_num + 1:
-        JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
-    user_id = user.objects.filter(kid=req.user_id)
-    if partyboard.objects.filter(party=party_ing[party_num], user=user_id):
-        JsonResponse(make_simple_text_response("이미 말씀하신 파티에 속해있는 상태입니다."))
+        return JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
+    user_id = user.objects.filter(kid=req.user_id).first()
+    # if partyboard.objects.filter(party=party_ing[party_num], user=user_id):
+    #     return JsonResponse(make_simple_text_response("이미 말씀하신 파티에 속해있는 상태입니다."))
     mys_num = int(req.params.get('mystic', {'value':'미0'})['value'][1])
     val_num = int(req.params.get('valor', {'value':'발0'})['value'][1])
     ins_num = int(req.params.get('instinct', {'value':'인0'})['value'][1])
     user_tag = req.params['sys_text']['value']
-    if user_tag == "괜찮아요":
+    if user_tag == "알릴 말이 없어요":
         user_tag = ""
     if any([mys_num, val_num, ins_num]):
         partyboard.objects.create(party=party_ing[party_num],tag=user_tag,user=user_id,val=val_num,mys=mys_num,ins=ins_num)
@@ -143,13 +144,14 @@ def mod_time(request):
     party_ing = party.objects.filter(time__gte=datetime.datetime.now())
     party_num = int(req.params['party']['value'][1]) - 1
     if len(party_ing) < party_num + 1:
-        JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
+        return JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
     mod_party = party_ing[party_num]
     dt = json.loads(req.params['sys_plugin_datetime']['value'])['value']
     mod_date = list(map(int, dt[0:10].split('-')))
     mod_time = list(map(int, dt[11:19].split(':')))
     st = datetime.datetime(mod_date[0], mod_date[1], mod_date[2], mod_time[0], mod_time[1], 0, 0)
-    mod_party.update(time=st)
+    mod_party.time = st
+    mod_party.save()
     return JsonResponse(make_simple_text_response(get_party_board()))
 
 
@@ -162,7 +164,8 @@ def mod_gym(request):
         JsonResponse(make_simple_text_response("파티는 "+str(len(party_ing))+"개가 진행중입니다"))
     mod_party = party_ing[party_num]
     gym_obj = raid_ing.objects.filter(gym__name=req.params['gym_name']['value']).first()
-    mod_party.update(raid=gym_obj)
+    mod_party.raid = gym_obj
+    mod_party.save()
     return JsonResponse(make_simple_text_response(get_party_board()))
 
 
