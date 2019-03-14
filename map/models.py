@@ -129,6 +129,7 @@ class partyboard(models.Model):
 class event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
+    img_url = models.URLField(null=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
