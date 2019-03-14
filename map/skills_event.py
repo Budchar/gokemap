@@ -31,11 +31,13 @@ def make_basic_card(title, time, extra, imgurl):
         },
         'buttons': [
             {
-                'action': 'message',
+                'action': 'block',
                 'label': "상세 정보",
                 'messageText': '이벤트 상세 정보',
-                'blockid': '5c89f9ac5f38dd4767218f9d',
-                'extra': extra
+                'blockId': '5c89f9ac5f38dd4767218f9d',
+                'extra': {
+                    'data': extra,
+                }
             },
         ]
     }
@@ -65,9 +67,9 @@ class req_rsp:
     def __init__(self, request):
         json_str = request.body.decode('utf-8')
         received_json_data = json.loads(json_str)
-        print(received_json_data)
         self.params = received_json_data['action']['detailParams']
         self.user_id = received_json_data['userRequest']['user']['id']
+        self.client_data = received_json_data['action']['clientExtra']['data']
 
 
 @csrf_exempt
@@ -91,4 +93,15 @@ def board(request):
 @csrf_exempt
 def detail(request):
     req = req_rsp(request)
-    return JsonResponse()
+    event_obj = event.objects.filter(id=req.client_data)
+    # 이미 시작한 이벤트
+    if event_obj.start_time > timezone.now():
+        time_delta = event_obj.end_time - timezone.now()
+        e_time = str(event_obj.end_time.strftime('%m/%d %H:%M')) + " 종료" + "(종료까지 " + str(time_delta)[0:2] + "일" + str(time_delta)[7:-10] + ")"
+        text = event_obj.title + "\n" + e_time + "\n\n" + event_obj.description
+        return JsonResponse(make_simple_text_response(text))
+    else:
+        time_delta = event_obj.start_time - timezone.now()
+        e_time = str(event_obj.start_time.strftime('%m/%d %H:%M')) + " 시작" + "(시작까지 " + str(time_delta)[0:2] + "일" + str(time_delta)[7:-10] + ")"
+        text = event_obj.title + "\n" + e_time + "\n\n" + event_obj.description
+        return JsonResponse(make_simple_text_response(text))
