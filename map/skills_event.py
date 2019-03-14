@@ -1,6 +1,4 @@
-import datetime
 import json
-from datetime import timedelta
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -24,13 +22,22 @@ def make_simple_text_response(text):
     return skill_response_default
 
 
-def make_basic_card(title, description, imgurl):
+def make_basic_card(title, time, extra, imgurl):
     card_form = {
         'title': title,
-        'description': description,
+        'description': time,
         'thumbnail':{
             'imageUrl': imgurl,
-        }
+        },
+        'buttons': [
+            {
+                'action': 'message',
+                'label': "상세 정보",
+                'messageText': '이벤트 상세 정보',
+                'blockid': '5c89f9ac5f38dd4767218f9d',
+                'extra': extra
+            },
+        ]
     }
     return card_form
 
@@ -45,10 +52,11 @@ def make_carousel(card_list):
     data = {
         "carousel":{
             'type': "basicCard",
-            'items': card_list
+            'items': card_list,
         }
-        }
-    lis = list(data)
+    }
+    lis = list()
+    lis.append(data)
     skill_response_default['template']['outputs'] = lis
     return skill_response_default
 
@@ -57,13 +65,13 @@ class req_rsp:
     def __init__(self, request):
         json_str = request.body.decode('utf-8')
         received_json_data = json.loads(json_str)
+        print(received_json_data)
         self.params = received_json_data['action']['detailParams']
         self.user_id = received_json_data['userRequest']['user']['id']
 
 
 @csrf_exempt
 def board(request):
-    req = req_rsp(request)
     # 시작했고 아직 안 끝난 이벤트
     event_now = event.objects.filter(end_time__gte=timezone.now(), start_time__lte=timezone.now()).order_by('start_time')
     # 아직 시작 안 한 이벤트
@@ -71,12 +79,16 @@ def board(request):
     card_list = list()
     for e in event_now:
         time_delta = e.end_time - timezone.now()
-        e_title = e.title + " " + str(e.end_time.strftime('%m/%d %H:%M'))
-        e_description = e.description + "\n" + "종료까지 " + str(time_delta)[0:2] + "일" + str(time_delta)[7:-10]
-        card_list.append(make_basic_card(e_title, e_description, e.img_url))
+        e_time = str(e.end_time.strftime('%m/%d %H:%M')) + " 종료" + "(종료까지 " + str(time_delta)[0:2] + "일" + str(time_delta)[7:-10] + ")"
+        card_list.append(make_basic_card(e.title, e_time, e.id, e.img_url))
     for e in event_upcoming:
         time_delta = e.start_time - timezone.now()
-        e_title = e.title + " " + str(e.start_time.strftime('%m/%d %H:%M'))
-        e_description = e.description + "\n" + "시작까지 " + str(time_delta)[0:2] + "일" + str(time_delta)[7:-10]
-        card_list.append(make_basic_card(e_title,e_description,e.img_url))
+        e_time = str(e.start_time.strftime('%m/%d %H:%M')) + " 시작" + "(시작까지 " + str(time_delta)[0:2] + "일" + str(time_delta)[7:-10] + ")"
+        card_list.append(make_basic_card(e.title, e_time, e.id, e.img_url))
     return JsonResponse(make_carousel(card_list))
+
+
+@csrf_exempt
+def detail(request):
+    req = req_rsp(request)
+    return JsonResponse()

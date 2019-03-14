@@ -47,13 +47,13 @@ def user_enroll(request):
 @csrf_exempt
 def team_enroll(request):
     req = req_rsp(request)
-    v = req.params['user_team']['value'].find("발")+1
-    i = req.params['user_team']['value'].find("인")+1
-    m = req.params['user_team']['value'].find("미")+1
+    mys_num = int(req.params.get('mystic', {'value':'미0'})['value'][1])
+    val_num = int(req.params.get('valor', {'value':'발0'})['value'][1])
+    ins_num = int(req.params.get('instinct', {'value':'인0'})['value'][1])
     request_user = user.objects.filter(kid=req.user_id)
     # 유저 닉네임이 등록되어있을시
     if request_user:
-        request_user.update(kid=req.user_id, val=int(req.params['user_team']['value'][v]), ins=int(req.params['user_team']['value'][i]), mys=int(req.params['user_team']['value'][m]))
+        request_user.update(kid=req.user_id, val=val_num, ins=ins_num, mys=mys_num)
         return JsonResponse(make_simple_text_response(request_user[0].nick+"님 팀 등록 감사합니다"))
     else:
         return JsonResponse(make_simple_text_response("별명 등록 먼저 부탁드립니다"))
