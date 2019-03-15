@@ -1,35 +1,7 @@
-import datetime
-import json
-from datetime import timedelta
 from django.http import JsonResponse
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import user
-
-
-def make_simple_text_response(text):
-    skill_response_default = {
-            "version":"2.0",
-            "template":{},
-            "context":{},
-            "data":{},
-        }
-    data = {
-        "simpleText":{}
-        }
-    lis = list()
-    data['simpleText']['text'] = text
-    lis.append(data)
-    skill_response_default['template']['outputs'] = lis
-    return skill_response_default
-
-
-class req_rsp:
-    def __init__(self, request):
-        json_str = request.body.decode('utf-8')
-        received_json_data = json.loads(json_str)
-        self.params = received_json_data['action']['detailParams']
-        self.user_id = received_json_data['userRequest']['user']['id']
+from .skills import req_rsp, make_simple_text_response
 
 
 @csrf_exempt

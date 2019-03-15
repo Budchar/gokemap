@@ -4,23 +4,7 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from .models import party, raid_ing, partyboard, user
-
-
-def make_simple_text_response(text):
-    skill_response_default = {
-            "version":"2.0",
-            "template":{},
-            "context":{},
-            "data":{},
-        }
-    data = {
-        "simpleText":{}
-        }
-    lis = list()
-    data['simpleText']['text'] = text
-    lis.append(data)
-    skill_response_default['template']['outputs'] = lis
-    return skill_response_default
+from .skills import req_rsp, make_simple_text_response
 
 
 def get_party_board():
@@ -71,14 +55,6 @@ def get_party_board():
         return text
     else:
         return "현재 진행중인 파티가 없습니다! 만들어보시는 건 어떨까요?"
-
-
-class req_rsp:
-    def __init__(self, request):
-        json_str = request.body.decode('utf-8')
-        received_json_data = json.loads(json_str)
-        self.params = received_json_data['action']['detailParams']
-        self.user_id = received_json_data['userRequest']['user']['id']
 
 
 @csrf_exempt

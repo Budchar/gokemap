@@ -5,23 +5,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import raid_ing, raid
-
-
-def make_simple_text_response(text):
-    skill_response_default = {
-            "version":"2.0",
-            "template":{},
-            "context":{},
-            "data":{},
-        }
-    data = {
-        "simpleText":{}
-        }
-    lis = list()
-    data['simpleText']['text'] = text
-    lis.append(data)
-    skill_response_default['template']['outputs'] = lis
-    return skill_response_default
+from .skills import req_rsp, make_simple_text_response
 
 
 # raid_post의 jsonresponse를 만들어주는 함수
@@ -37,9 +21,7 @@ def get_resp(params, raid_ing_object, stt):
 
 @csrf_exempt
 def post(request):
-    json_str = request.body.decode('utf-8')
-    received_json_data = json.loads(json_str)
-    params = received_json_data['action']['detailParams']
+    params = req_rsp(request).params
     dt = json.loads(params['sys_plugin_datetime']['value'])['value']
     date = list(map(int, dt[0:10].split('-')))
     time = list(map(int, dt[11:19].split(':')))
@@ -72,12 +54,7 @@ def board(request):
 
 @csrf_exempt
 def mod(request):
-    #json data decode
-    json_str = request.body.decode('utf-8')
-    # 디코드한 json data 풀어보기
-    received_json_data = json.loads(json_str)
-    # json 파일에서 입력값을 전달해주는 param 접근
-    params = received_json_data['action']['detailParams']
+    params = req_rsp(request).params
     raid_ing_object = raid_ing.objects.filter(gym__name=params['gym_name']['value'])
     if 'sys_plugin_datetime' in params:
         dt = json.loads(params['sys_plugin_datetime']['value'])['value']
