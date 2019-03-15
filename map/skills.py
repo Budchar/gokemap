@@ -7,13 +7,10 @@ class req_rsp:
         json_str = request.body.decode('utf-8')
         # 디코드한 json data 풀어보기
         self.received_json_data = json.loads(json_str)
+        # json 파일에서 입력값을 전달해주는 param 접근
+        self.params = self.received_json_data['action']['detailParams']
+        self.user_id = self.received_json_data['userRequest']['user']['id']
 
-    def params(self):
-        return self.received_json_data['action']['detailParams']
-
-    def user_id(self):
-        return self.received_json_data['userRequest']['user']['id']
-    
     def client_data(self):
         return self.received_json_data['action']['clientExtra']['data']
 
