@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
-from . import views, skills_raid, skills_user, skills_research, skills_party, skills_event
+from . import views, skills_raid, skills_user, skills_research, skills_party, skills_event, skills_pokemon
 
 app_name = 'map'
 urlpatterns = [
@@ -22,8 +22,10 @@ urlpatterns = [
     url(r'^party_arrived/', skills_party.arrived),
     url(r'^party_mod_time/', skills_party.mod_time),
     url(r'^party_mod_gym/', skills_party.mod_gym),
-    url(r'^event_board', skills_event.board),
-    url(r'^event_detail', skills_event.detail),
+    url(r'^event_board/', skills_event.board),
+    url(r'^event_detail/', skills_event.detail),
+    url(r'^pokemon_info', skills_pokemon.info),
+    url(r'^pokemon_detail', skills_pokemon.detail),
     # path('posted/', views.raid_post, name='posted'),
     # path('party/', views.party_post, name='p_posted'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
