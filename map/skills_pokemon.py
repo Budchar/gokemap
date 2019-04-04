@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 import math
 from .models import pokemon
-from .skills import req_rsp, make_simple_text_response, make_basic_card, make_carousel
+from .skills import req_rsp, skillResponse, singleResponse, simple_text
 
 
 def weak(type_1, type_2=False):
@@ -136,4 +136,4 @@ def detail(request):
             else:
                 weak_txt += f'{key}({round(value, 2)}배) '
     output = f"{poke_obj.name} (#{poke_obj.id}) {', '.join(weather_set)}\n\n" + f"타입 {types}\n" + f"약점 {weak_txt}\n" +f"공격 {poke_obj.atk}/방어 {poke_obj.df}/체력 {poke_obj.stm}\n\n" + f"CP(전체 {cp_rank}위)\n" + f"Lv20.💯{math.floor(poke_obj.cp_cal(15,15,15,20))}\n" + f"Lv25.💯{math.floor(poke_obj.cp_cal(15,15,15,25))}\n"
-    return JsonResponse(make_simple_text_response(output))
+    return JsonResponse(simple_text(output))

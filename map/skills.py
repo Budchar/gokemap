@@ -1,4 +1,51 @@
 import json
+import datetime
+from datetime import timedelta
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views.generic import View
+from .models import raid_ing
+
+block_dict = {
+    '이벤트 상세 정보': '5c89f9ac5f38dd4767218f9d',
+    '레이드 정정': '5c767e21384c5541a0eea6f1',
+    '명령어': '5c764774e821274ba7898374',
+}
+
+
+class SkillResponseView(View):
+    def make_response(self, request):
+        resp = skillResponse()
+        return resp
+
+    def decode_request(self, request):
+        decoded_request = req_rsp(request)
+        return self.make_response(decoded_request)
+
+    def post(self, request):
+        # 받은 json request 풀어보기
+        skill_response = self.decode_request(request)
+        return JsonResponse(skill_response)
+
+    def raid_board(self):
+        raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by(
+            's_time')
+        raid_board_response = skillResponse()
+        if raid_bd:
+            text = ""
+            card_list = list()
+            for board in raid_bd:
+                raid_obj = str(board.poke.poke) if board.poke else str(board.tier) + "성"
+                board_text = str(board.s_time.strftime('%H:%M')) + "~" + str(
+                    (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
+                    board.gym.nick) + " " + raid_obj + "\n"
+                text += board_text
+                card_list.append(singleResponse(board_text.rstrip()).block_button('레이드 정정', {'gym_id': board.id}).card())
+            raid_board_response.input(singleResponse("레이드 현황", text).share().card())
+            raid_board_response.carousel(card_list)
+            return raid_board_response.default
+        else:
+            return raid_board_response.input(simple_text("현재 알려진 레이드가 없습니다! 제보하시겠어요?")).default
 
 
 class req_rsp:
@@ -14,64 +61,99 @@ class req_rsp:
     def client_data(self):
         return self.received_json_data['action']['clientExtra']['data']
 
+    def get_time(self):
+        dt = json.loads(self.params['sys_plugin_datetime']['value'])['value']
+        mod_date = list(map(int, dt[0:10].split('-')))
+        mod_time = list(map(int, dt[11:19].split(':')))
+        st = datetime.datetime(mod_date[0], mod_date[1], mod_date[2], mod_time[0], mod_time[1], 0, 0)
+        return st
 
-def make_simple_text_response(text):
-    skill_response_default = {
-            "version":"2.0",
-            "template":{},
-            "context":{},
-            "data":{},
+
+class skillResponse:
+    def __init__(self):
+        self.default = {
+            "version": "2.0",
+            "template": {
+                'outputs': list(),
+                'quickReplies': list(),
+            },
+            "context": {},
+            "data": {},
         }
-    data = {
-        "simpleText":{}
-        }
-    lis = list()
-    data['simpleText']['text'] = text
-    lis.append(data)
-    skill_response_default['template']['outputs'] = lis
-    return skill_response_default
+        self.quickReply("홈", "처음으로 가줘 모비", "명령어")
 
+    def input(self, data_list):
+        self.default["template"]['outputs'].append(data_list)
+        return self
 
-def make_basic_card(title, time, extra, imgurl):
-    card_form = {
-        'title': title,
-        'description': time,
-        'thumbnail':{
-            'imageUrl': imgurl,
-        },
-        'buttons': [
+    def carousel(self, card_list):
+        self.default['template']['outputs'].append({
+            "carousel":{
+                'type': "listCard",
+                'items': card_list,
+            }
+        })
+        return self
+
+    def quickReply(self, label, message, block, extra=""):
+        self.default["template"]["quickReplies"].append(
             {
-                'action': 'block',
-                'label': "상세 정보",
-                'messageText': '이벤트 상세 정보',
-                'blockId': '5c89f9ac5f38dd4767218f9d',
-                'extra': {
-                    'data': extra,
+                "type": "block",
+                "label": label,
+                "message": message,
+                "data": {
+                    "blockId": block_dict[block],
+                    "extra": extra
                 }
-            },
-            {
-                'action': 'share',
-                'label': "공유하기",
-            },
-        ]
-    }
-    return card_form
+            }
+        )
+        return self
 
+class singleResponse:
+    def __init__(self, title="", description="", thumbnail=""):
+        self.form = dict()
+        self.onoff = 0
+        if title:
+            self.form["title"] = title
+        if description:
+            self.form["description"] = description
+        if thumbnail:
+            self.form['thumbnail']['imageUrl'] = thumbnail
 
-def make_carousel(card_list):
-    skill_response_default = {
-            "version":"2.0",
-            "template":{},
-            "context":{},
-            "data":{},
+    def make_button(self):
+        if self.onoff == 1:
+            return
+        self.onoff = 1
+        self.form['buttons'] = list()
+        return
+
+    def share(self):
+        self.make_button()
+        self.form['buttons'].append({'action': 'share', 'label': '공유하기'})
+        return self
+
+    def block_button(self, block, extra):
+        self.make_button()
+        self.form['buttons'].append({
+                'action': 'block',
+                'label': block,
+                'messageText': block,
+                'blockId': block_dict[block],
+                'extra': extra
+            }
+        )
+        return self
+
+    def card(self):
+        return {'basicCard': self.form}
+    
+
+# 간단한 텍스트 아웃풋을 만드려면 simple_text를 이용하자
+def simple_text(text):
+        resp = skillResponse()
+        form = {
+            "simpleText": {
+                'text': text
+            }
         }
-    data = {
-        "carousel":{
-            'type': "basicCard",
-            'items': card_list,
-        }
-    }
-    lis = list()
-    lis.append(data)
-    skill_response_default['template']['outputs'] = lis
-    return skill_response_default
+        return resp.input(form).default

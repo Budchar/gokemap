@@ -53,7 +53,7 @@ class raid(models.Model):
     ison = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.poke.name
+        return "{0} {1}".format(self.Tier, self.poke.name)
 
 
 class gym(models.Model):
@@ -95,7 +95,7 @@ class pokestop(models.Model):
 
 class raid_ing(models.Model):
     gym = models.OneToOneField(gym, on_delete=models.DO_NOTHING)
-    poke = models.ForeignKey(raid, on_delete=models.DO_NOTHING, blank=True, null=True)
+    poke = models.ForeignKey(raid, on_delete=models.SET_DEFAULT, blank=True, null=True, default=1)
     tier = models.IntegerField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5)], default=0)
     s_time = models.DateTimeField(null=True)
 

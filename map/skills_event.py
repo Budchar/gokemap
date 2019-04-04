@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import event
-from .skills import req_rsp, make_simple_text_response, make_basic_card, make_carousel
+from .skills import req_rsp, skillResponse, singleResponse, simple_text
 
 
 @csrf_exempt
@@ -15,26 +15,26 @@ def board(request):
     for e in event_now:
         time_delta = e.end_time - timezone.now()
         e_time = str(e.end_time.strftime('%m/%d %H:%M')) + " 종료\n" + "(종료까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
-        card_list.append(make_basic_card(e.title, e_time, e.id, e.img_url))
+        card_list.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}).share().card())
     for e in event_upcoming:
         time_delta = e.start_time - timezone.now()
         e_time = str(e.start_time.strftime('%m/%d %H:%M')) + " 시작\n" + "(시작까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
-        card_list.append(make_basic_card(e.title, e_time, e.id, e.img_url))
-    return JsonResponse(make_carousel(card_list))
+        card_list.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}).share().card())
+    return JsonResponse(skillResponse.carousel(card_list).default)
 
 
 @csrf_exempt
 def detail(request):
     req = req_rsp(request)
-    event_obj = event.objects.filter(id=req.client_data()).first()
+    event_obj = event.objects.filter(id=req.client_data()["event_id"]).first()
     # 이미 시작한 이벤트
     if event_obj.start_time < timezone.now():
         time_delta = event_obj.end_time - timezone.now()
         e_time = str(event_obj.end_time.strftime('%m/%d %H:%M')) + " 종료\n" + "(종료까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
         text = event_obj.title + "\n" + e_time + "\n\n" + event_obj.description
-        return JsonResponse(make_simple_text_response(text))
+        return JsonResponse(simple_text(text))
     else:
         time_delta = event_obj.start_time - timezone.now()
         e_time = str(event_obj.start_time.strftime('%m/%d %H:%M')) + " 시작\n" + "(시작까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
         text = event_obj.title + "\n" + e_time + "\n\n" + event_obj.description
-        return JsonResponse(make_simple_text_response(text))
+        return JsonResponse(simple_text(text))

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import user
-from .skills import req_rsp, make_simple_text_response
+from .skills import req_rsp, skillResponse, singleResponse, simple_text
 
 
 @csrf_exempt
@@ -10,10 +10,10 @@ def user_enroll(request):
     request_user = user.objects.filter(kid=req.user_id)
     if request_user:
         request_user.update(nick=req.params['user_name']['value'])
-        return JsonResponse(make_simple_text_response(request_user[0].nick+"(으)로 이름을 바꾸셨군요"))
+        return JsonResponse(simple_text(request_user[0].nick+"(으)로 이름을 바꾸셨군요"))
     else:
         user.objects.create(kid=req.user_id, nick=req.params['user_name']['value'])
-        return JsonResponse(make_simple_text_response(req.params['user_name']['value']+"님 안녕하세요"))
+        return JsonResponse(simple_text(req.params['user_name']['value']+"님 안녕하세요"))
 
 
 @csrf_exempt
@@ -26,6 +26,6 @@ def team_enroll(request):
     # 유저 닉네임이 등록되어있을시
     if request_user:
         request_user.update(kid=req.user_id, val=val_num, ins=ins_num, mys=mys_num)
-        return JsonResponse(make_simple_text_response(request_user[0].nick+"님 팀 등록 감사합니다"))
+        return JsonResponse(simple_text(request_user[0].nick+"님 팀 등록 감사합니다"))
     else:
-        return JsonResponse(make_simple_text_response("별명 등록 먼저 부탁드립니다"))
+        return JsonResponse(simple_text("별명 등록 먼저 부탁드립니다"))
