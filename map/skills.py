@@ -7,7 +7,7 @@ from django.views.generic import View
 from .models import raid_ing
 
 block_dict = {
-    '이벤트 상세 정보': '5c89f9ac5f38dd4767218f9d',
+    '이벤트 상세정보': '5c89f9ac5f38dd4767218f9d',
     '레이드 정정': '5c767e21384c5541a0eea6f1',
     '명령어': '5c764774e821274ba7898374',
 }
@@ -40,12 +40,12 @@ class SkillResponseView(View):
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
                     board.gym.nick) + " " + raid_obj + "\n"
                 text += board_text
-                card_list.append(singleResponse(board_text.rstrip()).block_button('레이드 정정', {'gym_id': board.id}).card())
+                card_list.append(singleResponse(board_text.rstrip()).block_button('레이드 정정', {'gym_id': board.id}).form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())
             raid_board_response.carousel(card_list)
             return raid_board_response.default
         else:
-            return raid_board_response.input(simple_text("현재 알려진 레이드가 없습니다! 제보하시겠어요?")).default
+            return simple_text("현재 알려진 레이드가 없습니다! 제보하시겠어요?")
 
 
 class req_rsp:
@@ -59,7 +59,7 @@ class req_rsp:
         self.user_id = self.received_json_data['userRequest']['user']['id']
 
     def client_data(self):
-        return self.received_json_data['action']['clientExtra']['data']
+        return self.received_json_data['action']['clientExtra']
 
     def get_time(self):
         dt = json.loads(self.params['sys_plugin_datetime']['value'])['value']
@@ -67,6 +67,12 @@ class req_rsp:
         mod_time = list(map(int, dt[11:19].split(':')))
         st = datetime.datetime(mod_date[0], mod_date[1], mod_date[2], mod_time[0], mod_time[1], 0, 0)
         return st
+
+    def cal_time(self):
+        # 13:33
+        text_time = self.params['my_time']['value']
+        hours, minutes = list(map(int, text_time.split(':')))
+        return datetime.datetime.combine(datetime.datetime.now().date(), datetime.time(hour=hours, minute=minutes))
 
 
 class skillResponse:
@@ -80,7 +86,7 @@ class skillResponse:
             "context": {},
             "data": {},
         }
-        self.quickReply("홈", "처음으로 가줘 모비", "명령어")
+        self.quickReply("홈", "명령어", "명령어")
 
     def input(self, data_list):
         self.default["template"]['outputs'].append(data_list)
@@ -89,7 +95,7 @@ class skillResponse:
     def carousel(self, card_list):
         self.default['template']['outputs'].append({
             "carousel":{
-                'type': "listCard",
+                'type': "basicCard",
                 'items': card_list,
             }
         })
@@ -98,9 +104,9 @@ class skillResponse:
     def quickReply(self, label, message, block, extra=""):
         self.default["template"]["quickReplies"].append(
             {
-                "type": "block",
+                "action": "block",
                 "label": label,
-                "message": message,
+                "messageText": message,
                 "data": {
                     "blockId": block_dict[block],
                     "extra": extra
@@ -118,7 +124,7 @@ class singleResponse:
         if description:
             self.form["description"] = description
         if thumbnail:
-            self.form['thumbnail']['imageUrl'] = thumbnail
+            self.form['thumbnail'] = {'imageUrl':thumbnail}
 
     def make_button(self):
         if self.onoff == 1:
@@ -146,7 +152,7 @@ class singleResponse:
 
     def card(self):
         return {'basicCard': self.form}
-    
+
 
 # 간단한 텍스트 아웃풋을 만드려면 simple_text를 이용하자
 def simple_text(text):

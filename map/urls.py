@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^raid_report_fire/', csrf_exempt(skills_raid.reportFire.as_view())),
     url(r'^raid_post/', csrf_exempt(skills_raid.raid_post.as_view())),
     url(r'^raid_board/', csrf_exempt(skills_raid.raid_board.as_view())),
-    url(r'^raid_mod/', skills_raid.mod),
+    url(r'^raid_mod/', csrf_exempt(skills_raid.mod.as_view())),
     url(r'^user_enroll/', skills_user.user_enroll),
     url(r'^team_enroll/', skills_user.team_enroll),
     url(r'^research_post/', skills_research.post),
