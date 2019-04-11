@@ -9,6 +9,8 @@ from .models import raid_ing
 block_dict = {
     '이벤트 상세정보': '5c89f9ac5f38dd4767218f9d',
     '레이드 정정': '5c767e21384c5541a0eea6f1',
+    '레이드 장소': '5c923394384c550f44a1a739',
+    '레이드 포켓몬': '5ca20d715f38dd08cf0ee9e7',
     '명령어': '5c764774e821274ba7898374',
 }
 
@@ -124,7 +126,9 @@ class singleResponse:
         if description:
             self.form["description"] = description
         if thumbnail:
-            self.form['thumbnail'] = {'imageUrl':thumbnail}
+            self.form['thumbnail'] = {'imageUrl':thumbnail,
+                                      # 'link':{'type':"WEB",'webUrl':thumbnail}
+                                      }
 
     def make_button(self):
         if self.onoff == 1:
@@ -138,12 +142,12 @@ class singleResponse:
         self.form['buttons'].append({'action': 'share', 'label': '공유하기'})
         return self
 
-    def block_button(self, block, extra):
+    def block_button(self, block, extra, messagetext=""):
         self.make_button()
         self.form['buttons'].append({
                 'action': 'block',
                 'label': block,
-                'messageText': block,
+                'messageText': messagetext if messagetext else block,
                 'blockId': block_dict[block],
                 'extra': extra
             }
@@ -163,3 +167,12 @@ def simple_text(text):
             }
         }
         return resp.input(form).default
+
+
+def simple_image(imgUrl, altText):
+    return {
+        "simpleImage":{
+            "imageUrl": imgUrl,
+            "altText": altText
+        }
+    }

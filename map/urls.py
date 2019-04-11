@@ -10,6 +10,7 @@ urlpatterns = [
     # ex: /map/
     path('', views.IndexView.as_view(), name='index'),
     url(r'^raid_report_fire/', csrf_exempt(skills_raid.reportFire.as_view())),
+    url(r'^raid_report_gym/', csrf_exempt(skills_raid.reportGym.as_view())),
     url(r'^raid_post/', csrf_exempt(skills_raid.raid_post.as_view())),
     url(r'^raid_board/', csrf_exempt(skills_raid.raid_board.as_view())),
     url(r'^raid_mod/', csrf_exempt(skills_raid.mod.as_view())),
