@@ -37,7 +37,14 @@ class SkillResponseView(View):
             text = ""
             card_list = list()
             for board in raid_bd:
-                raid_obj = str(board.poke.poke) if board.poke else str(board.tier) + "성"
+                if board.tier == 1:
+                    raid_obj = "분홍알"
+                elif board.tier == 3:
+                    raid_obj = "노란알"
+                elif board.tier == 5:
+                    raid_obj = "오성알"
+                elif board.poke:
+                    raid_obj = str(board.poke.poke)
                 board_text = str(board.s_time.strftime('%H:%M')) + "~" + str(
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
                     board.gym.nick) + " " + raid_obj + "\n"
@@ -72,7 +79,7 @@ class req_rsp:
 
     def cal_time(self):
         # 13:33
-        text_time = self.params['my_time']['value']
+        text_time = self.client_data()['raid_time'] if self.client_data()['raid_time'] else self.params['my_time']['value']
         hours, minutes = list(map(int, text_time.split(':')))
         return datetime.datetime.combine(datetime.datetime.now().date(), datetime.time(hour=hours, minute=minutes))
 
