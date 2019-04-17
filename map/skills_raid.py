@@ -1,20 +1,35 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 from .models import raid_ing, raid, gym
 from .skills import req_rsp, skillResponse, singleResponse, SkillResponseView, simple_text, simple_image
 
 
-class raid_post(SkillResponseView):
+class mod_quarter(SkillResponseView):
     def make_response(self, request):
-        params = request.params
-        st = request.get_time()
-        raid_ing_object = raid_ing.objects.filter(gym__name=params['gym_name']['value'])
-        if 'raid_level' in params:
-            raid_ing_object.update(poke=None, tier=params['raid_level']['value'], s_time=st)
-        elif 'raid_poke_name' in params:
-            poke = raid.objects.filter(poke__name=params['raid_poke_name']['value'])
-            raid_ing_object.update(poke=poke[0].id, tier=poke[0].Tier, s_time=st)
-        return self.raid_board()
+        resp = skillResponse()
+        extra_data = request.client_data()
+        gym = raid_ing.objects.filter(id=extra_data['gym_id']).first().gym.nick
+        blueEgg_list = list()
+        yellowEgg_list = list()
+        pinkEgg_list = list()
+        blueEgg_list.append(singleResponse(description="시간을 정정하시나요?").block_button("레이드 시간 정정", extra_data, f'{gym} 정정').form)
+        for r in raid.objects.filter(Tier=5):
+            blueEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
+        blueEgg_list.append(
+            singleResponse("오성알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 5}, f'{gym} 오성알 정정').form)
+        blueEgg_list.append(
+            singleResponse("분홍알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 3}, f'{gym} 분홍알 정정').form)
+        blueEgg_list.append(
+            singleResponse("노란알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 1}, f'{gym} 노란알 정정').form)
+        for r in raid.objects.filter(Tier=4):
+            yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
+        for r in raid.objects.filter(Tier=3):
+            yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
+        for r in raid.objects.filter(Tier=2):
+            pinkEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
+        for r in raid.objects.filter(Tier=1):
+            pinkEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
+        return resp.carousel(blueEgg_list).carousel(yellowEgg_list).carousel(pinkEgg_list).default
 
 
 class raid_board(SkillResponseView):
@@ -79,14 +94,17 @@ class reportGym(SkillResponseView):
 
 class reportPoke(SkillResponseView):
     def make_response(self, request):
-        extra_data = request.client_data()
-        gym = extra_data['gym'] if extra_data['gym'] else request.params['gym_name']['value']
+        extra_data = request.client_data() if request.client_data() else {}
+        print(request.received_json_data)
+        gym_name = request.params['gym_name']['value'] if request.params else extra_data['gym']
+        print(gym_name)
+        gym_obj = gym.objects.filter(Q(name=gym_name)|Q(nick=gym_name)).first()
         time = request.cal_time()
         if ('raid_level' in extra_data) or ('raid_level' in request.params):
-            level = extra_data['raid_level'] if extra_data['raid_level'] else request.params['raid_level']['value']
-            raid_ing.objects.create(gym=gym, tier=level, s_time=time)
+            level = request.params['raid_level']['value'] if request.params else extra_data['raid_level']
+            raid_ing.objects.create(gym=gym_obj, poke=None, tier=level, s_time=time)
         if ('raid_poke' in extra_data) or ('pokemon' in request.params):
-            poke = extra_data['raid_poke'] if extra_data['raid_poke'] else request.params['pokemon']['value']
-            poke_obj = raid.objects.filter(poke__id=poke)
-            raid_ing.objects.create(gym=gym, poke=poke_obj.id, tier=poke_obj.Tier, s_time=time)
+            poke = request.params['pokemon']['value'] if request.params else extra_data['raid_poke']
+            poke_obj = raid.objects.filter(poke__id=poke).first()
+            raid_ing.objects.create(gym=gym_obj, poke=poke_obj, tier=poke_obj.Tier, s_time=time)
         return self.raid_board()

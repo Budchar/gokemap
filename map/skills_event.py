@@ -18,11 +18,15 @@ def board(request):
         time_delta = e.end_time - timezone.now()
         e_time = str(e.end_time.strftime('%m/%d %H:%M')) + " 종료\n" + "(종료까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
         cards_after.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}).share().form)
+    if cards_after:
+        resp.carousel(cards_after)
     for e in event_upcoming:
         time_delta = e.start_time - timezone.now()
         e_time = str(e.start_time.strftime('%m/%d %H:%M')) + " 시작\n" + "(시작까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
         cards_before.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}).share().form)
-    return JsonResponse(resp.carousel(cards_after).carousel(cards_before).default)
+    if cards_before:
+        resp.carousel(cards_before)
+    return JsonResponse(resp.default)
 
 
 @csrf_exempt

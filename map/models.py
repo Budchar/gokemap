@@ -23,6 +23,8 @@ class pokemon(models.Model):
     stm = models.IntegerField(default=-1)
     c_rate = models.IntegerField(default=-1)
     r_rate = models.IntegerField(default=-1)
+    group = models.IntegerField(default=-1)
+    img_url = models.URLField(null=True)
 
     type_choice = {'normal': 'nm', 'fire': 'fr', 'water': 'wt', 'grass': 'grs', 'electric': 'et',
                    'ice': 'ice', 'fighting': 'ft', 'poison': 'ps', 'ground': 'gr', 'flying': 'fl', 'psychic': 'psy',
@@ -62,6 +64,7 @@ class gym(models.Model):
     x_cdn = models.CharField(max_length=20, default=-1)
     y_cdn = models.CharField(max_length=20, default=-1)
     geom = PointField(null=True, blank=True)
+    img_url = models.URLField(null=True)
 
     def __str__(self):
         return self.name
@@ -94,7 +97,7 @@ class pokestop(models.Model):
 
 
 class raid_ing(models.Model):
-    gym = models.OneToOneField(gym, on_delete=models.DO_NOTHING)
+    gym = models.ForeignKey(gym, on_delete=models.DO_NOTHING)
     poke = models.ForeignKey(raid, on_delete=models.SET_DEFAULT, blank=True, null=True, default=1)
     tier = models.IntegerField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5)], default=0)
     s_time = models.DateTimeField(null=True)

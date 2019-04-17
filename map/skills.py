@@ -9,6 +9,8 @@ from .models import raid_ing
 block_dict = {
     '이벤트 상세정보': '5c89f9ac5f38dd4767218f9d',
     '레이드 정정': '5c767e21384c5541a0eea6f1',
+    '레이드 시간 정정': '5c765278e821274ba789841c',
+    '레이드 포켓몬 정정': '5c767cf3e821274ba789850e',
     '레이드 장소': '5c923394384c550f44a1a739',
     '레이드 포켓몬': '5ca20d715f38dd08cf0ee9e7',
     '명령어': '5c764774e821274ba7898374',
@@ -37,14 +39,14 @@ class SkillResponseView(View):
             text = ""
             card_list = list()
             for board in raid_bd:
-                if board.tier == 1:
+                if board.poke:
+                    raid_obj = str(board.poke.poke)
+                elif board.tier == 1:
                     raid_obj = "분홍알"
                 elif board.tier == 3:
                     raid_obj = "노란알"
                 elif board.tier == 5:
                     raid_obj = "오성알"
-                elif board.poke:
-                    raid_obj = str(board.poke.poke)
                 board_text = str(board.s_time.strftime('%H:%M')) + "~" + str(
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
                     board.gym.nick) + " " + raid_obj + "\n"
@@ -79,7 +81,7 @@ class req_rsp:
 
     def cal_time(self):
         # 13:33
-        text_time = self.client_data()['raid_time'] if self.client_data()['raid_time'] else self.params['my_time']['value']
+        text_time = self.params['my_time']['value'] if self.params else self.client_data()['raid_time']
         hours, minutes = list(map(int, text_time.split(':')))
         return datetime.datetime.combine(datetime.datetime.now().date(), datetime.time(hour=hours, minute=minutes))
 
