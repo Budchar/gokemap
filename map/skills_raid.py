@@ -12,7 +12,7 @@ class mod_quarter(SkillResponseView):
         blueEgg_list = list()
         yellowEgg_list = list()
         pinkEgg_list = list()
-        blueEgg_list.append(singleResponse(description="시간을 정정하시나요?").block_button("레이드 시간 정정", extra_data, f'{gym} 정정').form)
+        blueEgg_list.append(singleResponse(description="시간을 정정하시나요?").block_button("레이드 시간 정정", {'gym': extra_data['gym_id']}, f'{gym} 정정').form)
         for r in raid.objects.filter(Tier=5):
             blueEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
         blueEgg_list.append(
@@ -39,14 +39,16 @@ class raid_board(SkillResponseView):
 
 class mod(SkillResponseView):
     def make_response(self, request):
-        params = request.params
-        raid_ing_object = raid_ing.objects.filter(gym__name=params['gym_name']['value'])
-        if 'sys_plugin_datetime' in params:
-            st = params.get_time()
-            raid_ing_object.update(s_time=st)
-        elif 'raid_poke_name' in params:
-            poke = raid.objects.filter(poke__name=params['raid_poke_name']['value'])
-            raid_ing_object.update(poke=poke[0].id, tier=poke[0].Tier)
+        extra_data = request.client_data()
+        raid_ing_id = extra_data['gym']
+        raid_ing_object = raid_ing.objects.filter(id=raid_ing_id).first()
+        if 'raid_poke' in extra_data:
+            poke_object = raid.objects.filter(poke=extra_data['raid_poke']).first()
+            raid_ing_object.update(poke=poke_object.id, tier=poke_object.Tier)
+        elif 'raid_level' in extra_data:
+            raid_ing_object.update(poke=None, tier=extra_data['raid_level'])
+        elif 'my_time' in request.params:
+            raid_ing_object.update(s_time=request.cal_time())
         return self.raid_board()
 
 
@@ -95,9 +97,7 @@ class reportGym(SkillResponseView):
 class reportPoke(SkillResponseView):
     def make_response(self, request):
         extra_data = request.client_data() if request.client_data() else {}
-        print(request.received_json_data)
         gym_name = request.params['gym_name']['value'] if request.params else extra_data['gym']
-        print(gym_name)
         gym_obj = gym.objects.filter(Q(name=gym_name)|Q(nick=gym_name)).first()
         time = request.cal_time()
         if ('raid_level' in extra_data) or ('raid_level' in request.params):
