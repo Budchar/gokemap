@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^event_detail/', skills_event.detail),
     url(r'^pokemon_info', skills_pokemon.info),
     url(r'^pokemon_detail', skills_pokemon.detail),
+    # url(r'^chat/', skills_chat. ~~),
     # path('posted/', views.raid_post, name='posted'),
     # path('party/', views.party_post, name='p_posted'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
