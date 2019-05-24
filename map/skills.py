@@ -13,6 +13,7 @@ block_dict = {
     '레이드 포켓몬 정정': '5c767cf3e821274ba789850e',
     '레이드 장소': '5c923394384c550f44a1a739',
     '레이드 포켓몬': '5ca20d715f38dd08cf0ee9e7',
+    '레이드 현황': '5c6f5b355f38dd01ebc09af4',
     '명령어': '5c764774e821274ba7898374',
 }
 
@@ -51,12 +52,19 @@ class SkillResponseView(View):
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
                     board.gym.nick) + " " + raid_obj + "\n"
                 text += board_text
-                card_list.append(singleResponse(board_text.rstrip()).block_button('레이드 정정', {'gym_id': board.id}).form)
+                card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())
             raid_board_response.carousel(card_list)
+            raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')
+            raid_board_response.quickReply("레이드 제보", "레이드 제보", "레이드 포켓몬")
             return raid_board_response.default
         else:
-            return simple_text("현재 알려진 레이드가 없습니다! 제보하시겠어요?")
+            form = {
+                "simpleText": {
+                    'text': "현재 알려진 레이드가 없습니다! 제보 하시겠어요?"
+                }
+            }
+            return raid_board_response.input(form).quickReply("새로고침", "레이드 현황", '레이드 현황').quickReply("레이드 제보", "레이드 제보", "레이드 포켓몬").default
 
 
 class req_rsp:

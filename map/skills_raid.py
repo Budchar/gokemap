@@ -41,7 +41,7 @@ class mod(SkillResponseView):
     def make_response(self, request):
         extra_data = request.client_data()
         raid_ing_id = extra_data['gym']
-        raid_ing_object = raid_ing.objects.filter(id=raid_ing_id).first()
+        raid_ing_object = raid_ing.objects.filter(id=raid_ing_id)
         if 'raid_poke' in extra_data:
             poke_object = raid.objects.filter(poke=extra_data['raid_poke']).first()
             raid_ing_object.update(poke=poke_object.id, tier=poke_object.Tier)
@@ -62,7 +62,7 @@ class reportFire(SkillResponseView):
         for i in range(6):
             liberal_list.append(singleResponse(gym_nicks[i]).block_button('레이드 장소', {'gym':gym_nicks[i],'raid_time':rep_time}, f'{rep_time} {gym_nicks[i]}').form)
         liberal_list.append(singleResponse(gym_nicks[16]).block_button('레이드 장소', {'gym':"한신아파트",'raid_time':rep_time}, f'{rep_time} 한신아파트').form)
-        liberal_list.append(singleResponse(gym_nicks[17]).block_button('레이드 장소', {'gym':'성복교회','raid_time':rep_time}, f'{rep_time} 성복교회').form)
+        liberal_list.append(singleResponse(gym_nicks[17]).block_button('레이드 장소', {'gym':'성복중앙교회','raid_time':rep_time}, f'{rep_time} 성복중앙교회').form)
         science_list = list()
         for i in range(6,12):
             science_list.append(singleResponse(gym_nicks[i]).block_button('레이드 장소', {'gym':gym_nicks[i],'raid_time':rep_time}, f'{rep_time} {gym_nicks[i]}').form)
@@ -81,8 +81,8 @@ class reportGym(SkillResponseView):
         for r in raid.objects.filter(Tier=5):
             blueEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.id}, f'{raid_time} {gym} {r.poke.name}').form)
         blueEgg_list.append(singleResponse("오성알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 5}, f'{raid_time} {gym} 오성알').form)
-        blueEgg_list.append(singleResponse("분홍알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 3}, f'{raid_time} {gym} 분홍알').form)
-        blueEgg_list.append(singleResponse("노란알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 1}, f'{raid_time} {gym} 노란알').form)
+        blueEgg_list.append(singleResponse("분홍알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 3}, f'{raid_time} {gym} 노란알').form)
+        blueEgg_list.append(singleResponse("노란알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 1}, f'{raid_time} {gym} 분홍알').form)
         for r in raid.objects.filter(Tier=4):
             yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.id}, f'{raid_time} {gym} {r.poke.name}').form)
         for r in raid.objects.filter(Tier=3):
