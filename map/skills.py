@@ -134,6 +134,7 @@ class skillResponse:
         )
         return self
 
+
 class singleResponse:
     def __init__(self, title="", description="", thumbnail=""):
         self.form = dict()

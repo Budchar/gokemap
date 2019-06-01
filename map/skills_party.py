@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from .models import party, raid_ing, partyboard, user
-from .skills import req_rsp, skillResponse, singleResponse, simple_text
+from .skills import req_rsp, skillResponse, singleResponse, simple_text, SkillResponseView
 
 
 def get_party_board():
@@ -57,25 +57,29 @@ def get_party_board():
         return "현재 진행중인 파티가 없습니다! 만들어보시는 건 어떨까요?"
 
 
-@csrf_exempt
-def post(request):
-    req = req_rsp(request)
-    user_obj = user.objects.filter(kid=req.user_id).first()
-    if not user_obj.nick:
-        return JsonResponse(simple_text("명령어 '나는'을 통해 닉네임 먼저 등록해주세요"))
-    if not any([user_obj.val, user_obj.ins, user_obj.mys]):
-        return JsonResponse(simple_text("명령어 '내 팀은'을 통해 팀 먼저 등록해주세요"))
-    raid_obj = raid_ing.objects.get(gym__name=req.params['gym_name']['value'])
-    st = req.get_time()
+class post(SkillResponseView):
+    def make_response(self, request):
+        user_obj = user.objects.filter(kid=request.user_id).first()
+        if not user_obj:
+            # TODO 자연스럽게 닉네임을 입력할 수 있도록 redirect하기
+            return simple_text("명령어 '나는'을 통해 닉네임 먼저 등록해주세요")
+        # if not any([user_obj.val, user_obj.ins, user_obj.mys]):
+        #     return simple_text("명령어 '내 팀은'을 통해 팀 먼저 등록해주세요")
+        raid_obj = raid_ing.objects.get(gym__name=request.params['gym_name']['value'])
+        st = request.cal_time()
+        team = request.params['team']['value'].split()
+        val = [int(t[1:]) for t in team if t[0] == '발']
+        mys = [int(t[1:]) for t in team if t[0] == '미']
+        ins = [int(t[1:]) for t in team if t[0] == '인']
 
-    party_obj = party.objects.filter(raid=raid_obj, time=st)
-    if party_obj:
-        return JsonResponse(simple_text("중복된 파티입니다."))
-    else:
-        party.objects.create(raid=raid_obj, time=st, description=req.params['description']['value'])
-        party_bd_obj = party.objects.get(raid__gym__name=req.params['gym_name']['value'], time=st)
-        partyboard.objects.create(party=party_bd_obj,user=user_obj,val=user_obj.val,mys=user_obj.mys,ins=user_obj.ins)
-        return JsonResponse(simple_text(get_party_board()))
+        party_obj = party.objects.filter(raid=raid_obj, time=st)
+        if party_obj:
+            return simple_text("중복된 파티입니다.")
+        else:
+            party.objects.create(raid=raid_obj, time=st, description=request.params['description']['value'])
+            party_bd_obj = party.objects.get(raid__gym__name=request.params['gym_name']['value'], time=st)
+            partyboard.objects.create(party=party_bd_obj,user=user_obj,val=val[0] if val else 0,mys=mys[0] if mys else 0,ins=ins[0] if ins else 0)
+            return simple_text(get_party_board())
 
 
 @csrf_exempt

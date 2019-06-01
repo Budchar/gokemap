@@ -15,7 +15,9 @@ class user(models.Model):
 
 
 class pokemon(models.Model):
+    num = models.CharField(max_length=10, default='미정')
     name = models.CharField(max_length=20, default="미정")
+    name_eng = models.CharField(max_length=20, default="미정")
     type_1 = models.CharField(max_length=4, default="미정")
     type_2 = models.CharField(max_length=4, default="미정")
     atk = models.IntegerField(default=-1)
@@ -23,7 +25,16 @@ class pokemon(models.Model):
     stm = models.IntegerField(default=-1)
     c_rate = models.IntegerField(default=-1)
     r_rate = models.IntegerField(default=-1)
+    female_rate = models.IntegerField(default=-1)
+    second_candy = models.IntegerField(default=-1)
+    buddy_distance = models.CharField(max_length=6, default='미정')
+    evolution_candy =  models.CharField(max_length=15, default='미정')
     group = models.IntegerField(default=-1)
+    lv20_000 = models.IntegerField(default=-1)
+    lv20_555 = models.IntegerField(default=-1)
+    lv25_000 = models.IntegerField(default=-1)
+    lv25_555 = models.IntegerField(default=-1)
+    lv40_555 = models.IntegerField(default=-1)
     img_url = models.URLField(null=True)
 
     type_choice = {'normal': 'nm', 'fire': 'fr', 'water': 'wt', 'grass': 'grs', 'electric': 'et',
