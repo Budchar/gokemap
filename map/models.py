@@ -132,7 +132,7 @@ class party(models.Model):
 
 class partyboard(models.Model):
     party = models.ForeignKey(party, on_delete=models.CASCADE)
-    user = models.ForeignKey(user, on_delete=models.CASCADE)
+    user = models.ForeignKey(user, on_delete=models.DO_NOTHING)
     val = models.IntegerField(blank=True, null=True)
     mys = models.IntegerField(blank=True, null=True)
     ins = models.IntegerField(blank=True, null=True)

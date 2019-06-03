@@ -18,9 +18,9 @@ class mod_quarter(SkillResponseView):
         blueEgg_list.append(
             singleResponse("오성알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 5}, f'{gym} 오성알 정정').form)
         blueEgg_list.append(
-            singleResponse("분홍알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 3}, f'{gym} 분홍알 정정').form)
+            singleResponse("노란알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 3}, f'{gym} 노란알 정정').form)
         blueEgg_list.append(
-            singleResponse("노란알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 1}, f'{gym} 노란알 정정').form)
+            singleResponse("분홍알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 1}, f'{gym} 분홍알 정정').form)
         for r in raid.objects.filter(Tier=4):
             yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.id}, f'{gym} {r.poke.name} 정정').form)
         for r in raid.objects.filter(Tier=3):

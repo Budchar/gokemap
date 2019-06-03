@@ -16,9 +16,12 @@ def get_party_board():
         for i, p in enumerate(party_ing):
             # 파티에 속해있는 유저들
             users = partyboard.objects.filter(party=p)
-            text += "[팟" + str(i+1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.poke.poke) +"\n"
-            text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,20))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,20))) +"\n"
-            text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,25))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,25))) + "(날씨부스트)\n\n"
+            if p.raid.poke:
+                text += "[팟" + str(i+1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.poke.poke) +"\n"
+                text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,20))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,20))) +"\n"
+                text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,25))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,25))) + "(날씨부스트)\n\n"
+            else:
+                text += "[팟" + str(i + 1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.tier) + "성\n"
             val_num = users.aggregate(Sum('val'))['val__sum'] if users else 0
             ins_num = users.aggregate(Sum('ins'))['ins__sum'] if users else 0
             mys_num = users.aggregate(Sum('mys'))['mys__sum'] if users else 0
@@ -59,18 +62,18 @@ def get_party_board():
 
 class post(SkillResponseView):
     def make_response(self, request):
+        print(request.params)
         user_obj = user.objects.filter(kid=request.user_id).first()
         if not user_obj:
             # TODO 자연스럽게 닉네임을 입력할 수 있도록 redirect하기
             return simple_text("명령어 '나는'을 통해 닉네임 먼저 등록해주세요")
         # if not any([user_obj.val, user_obj.ins, user_obj.mys]):
         #     return simple_text("명령어 '내 팀은'을 통해 팀 먼저 등록해주세요")
-        raid_obj = raid_ing.objects.get(gym__name=request.params['gym_name']['value'])
+        raid_obj = raid_ing.objects.filter(gym__name=request.params['gym_name']['value']).last()
         st = request.cal_time()
-        team = request.params['team']['value'].split()
-        val = [int(t[1:]) for t in team if t[0] == '발']
-        mys = [int(t[1:]) for t in team if t[0] == '미']
-        ins = [int(t[1:]) for t in team if t[0] == '인']
+        val = request.params.get('valor', {'value': '00'})['value'][1]
+        mys = request.params.get('mystic', {'value': '00'})['value'][1]
+        ins = request.params.get('instinct', {'value': '00'})['value'][1]
 
         party_obj = party.objects.filter(raid=raid_obj, time=st)
         if party_obj:
@@ -78,7 +81,7 @@ class post(SkillResponseView):
         else:
             party.objects.create(raid=raid_obj, time=st, description=request.params['description']['value'])
             party_bd_obj = party.objects.get(raid__gym__name=request.params['gym_name']['value'], time=st)
-            partyboard.objects.create(party=party_bd_obj,user=user_obj,val=val[0] if val else 0,mys=mys[0] if mys else 0,ins=ins[0] if ins else 0)
+            partyboard.objects.create(party=party_bd_obj,user=user_obj,val=val, mys=mys,ins=ins)
             return simple_text(get_party_board())
 
 
