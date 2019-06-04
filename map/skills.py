@@ -2,6 +2,7 @@ import json
 import datetime
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.views.generic import View
 from .models import raid_ing, party, partyboard
@@ -16,6 +17,7 @@ block_dict = {
     '레이드 현황': '5c6f5b355f38dd01ebc09af4',
     '명령어': '5c764774e821274ba7898374',
     '유저등록': '5c7766b805aaa75509eab579',
+    '파티 생성': '5c7b7540384c550f44a13f86',
 }
 
 
@@ -36,7 +38,7 @@ class SkillResponseView(View):
     def raid_board(self):
         raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by(
             's_time')
-        party_obj = party.objects.filter(time_gte=(timezone.now() + timezone.timedelta(minutes=-15)))
+        party_obj = party.objects.filter(time__gte=(timezone.now() + timezone.timedelta(minutes=-15)))
         raid_board_response = skillResponse()
         if raid_bd:
             text = ""
@@ -52,16 +54,36 @@ class SkillResponseView(View):
                     raid_obj = "오성알"
                 board_text = str(board.s_time.strftime('%H:%M')) + "~" + str(
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
-                    board.gym.nick) + " " + raid_obj + "\n"
+                    board.gym.nick) + " " + raid_obj + '\n'
+                text += board_text
                 if party_obj:
+                    party_text = ''
                     for i, p in enumerate(party_obj):
                         if p.raid == board:
+                            party_text += f'{p.time.strftime("%H:%M"):>13} 팟{i + 1} '
                             users = partyboard.objects.filter(party=p)
-                            board_text += f'[팟{i}/{len(users)}명/{p.time}]'
-                text += board_text
-                card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).form)
+                            mys_num = users.aggregate(Sum('mys'))['mys__sum'] if users else 0
+                            val_num = users.aggregate(Sum('val'))['val__sum'] if users else 0
+                            ins_num = users.aggregate(Sum('ins'))['ins__sum'] if users else 0
+                            party_text += f'❄{mys_num}명' if mys_num > 0 else ''
+                            party_text += f'🔥{val_num}명' if val_num > 0 else ''
+                            party_text += f'⚡{ins_num}명' if ins_num > 0 else ''
+                            party_text += '\n'
+                    text += party_text
+                card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).block_button_message('파티 생성',{'gym_name': board.id}, f'{board.gym.name} 팟 생성').form)
+
+            party_card_list = list()
+            # 현재 진행중인 파티 query
+            party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-15))
+            if party_ing:
+                # i는 파티순서, p는 파티 오브젝트
+                for i, p in enumerate(party_ing):
+                    party_card_list.append(singleResponse(get_party_board(i, p)).form)
+            else:
+                party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())
             raid_board_response.carousel(card_list)
+            raid_board_response.carousel(party_card_list)
             raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')
             raid_board_response.quickReply("레이드 제보", "레이드 제보", "레이드 포켓몬")
             return raid_board_response.default
@@ -179,6 +201,17 @@ class singleResponse:
         )
         return self
 
+    def block_button_message(self, block, extra, messagetext=""):
+        self.make_button()
+        self.form['buttons'].append({
+                'action': 'message',
+                'label': block,
+                'messageText': messagetext if messagetext else block,
+                'extra': extra
+            }
+        )
+        return self
+
     def card(self):
         return {'basicCard': self.form}
 
@@ -201,3 +234,49 @@ def simple_image(imgUrl, altText):
             "altText": altText
         }
     }
+
+
+def get_party_board(i, p):
+    text = ''
+    # 파티에 속해있는 유저들
+    users = partyboard.objects.filter(party=p)
+    if p.raid.poke:
+        text += "[팟" + str(i+1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.poke.poke) +"\n"
+        text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,20))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,20))) +"\n"
+        text += "🥇 " + str(int(p.raid.poke.poke.cp_cal(15,15,15,25))) + " /😱 " + str(int(p.raid.poke.poke.cp_cal(10,10,10,25))) + "(날씨부스트)\n\n"
+    else:
+        text += "[팟" + str(i + 1) + "] " + p.time.strftime('%H:%M') + " " + str(p.raid.gym.nick) + " " + str(p.raid.tier) + "성\n"
+    val_num = users.aggregate(Sum('val'))['val__sum'] if users else 0
+    ins_num = users.aggregate(Sum('ins'))['ins__sum'] if users else 0
+    mys_num = users.aggregate(Sum('mys'))['mys__sum'] if users else 0
+    val_text = "🔥(총 " + str(val_num) + "명)\n" if val_num > 0 else ""
+    ins_text = "⚡(총 "+ str(ins_num) + "명)\n" if ins_num > 0 else ""
+    mys_text = "❄(총 " + str(mys_num) + "명)\n" if mys_num > 0 else ""
+    val_ord = 0
+    ins_ord = 0
+    mys_ord = 0
+    for u in users:
+        u_tag = u.tag[0:15] if u.tag else " "
+        if u.val > 0:
+            val_ord += 1
+            isarrived = "✔" if u.arrived == 1 else str(val_ord)
+            val_text += isarrived + ". " + str(u.user.nick)
+            if u.val > 1:
+                val_text += " +" + str(u.val-1)
+            val_text += " " + u_tag + '\n'
+        if u.ins > 0:
+            ins_ord += 1
+            isarrived = "✔" if u.arrived == 1 else str(ins_ord)
+            ins_text += isarrived + ". " + str(u.user.nick)
+            if u.ins > 1:
+                ins_text += " +" + str(u.ins-1)
+            ins_text += " " + u_tag + '\n'
+        if u.mys > 0:
+            mys_ord += 1
+            isarrived = "✔" if u.arrived == 1 else str(mys_ord)
+            mys_text += isarrived + ". " + str(u.user.nick)
+            if u.mys > 1:
+                mys_text += " +" + str(u.mys-1)
+            mys_text += " " + u_tag + '\n'
+    text += val_text+mys_text+ins_text+"\n" + str(p.description) + "\n\n"
+    return text

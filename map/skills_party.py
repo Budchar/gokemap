@@ -10,7 +10,7 @@ from .skills import req_rsp, skillResponse, singleResponse, simple_text, SkillRe
 def get_party_board():
     text = ""
     # 현재 진행중인 파티 query
-    party_ing = party.objects.filter(time__gte=datetime.datetime.now())
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-15))
     if party_ing:
         # i는 파티순서, p는 파티 오브젝트
         for i, p in enumerate(party_ing):
@@ -82,7 +82,7 @@ class post(SkillResponseView):
             party.objects.create(raid=raid_obj, time=st, description=request.params['description']['value'])
             party_bd_obj = party.objects.get(raid__gym__name=request.params['gym_name']['value'], time=st)
             partyboard.objects.create(party=party_bd_obj,user=user_obj,val=val, mys=mys,ins=ins)
-            return simple_text(get_party_board())
+            return self.raid_board()
 
 
 @csrf_exempt
