@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.generic import View
-from .models import raid_ing
+from .models import raid_ing, party, partyboard
 
 block_dict = {
     '이벤트 상세정보': '5c89f9ac5f38dd4767218f9d',
@@ -36,6 +36,7 @@ class SkillResponseView(View):
     def raid_board(self):
         raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by(
             's_time')
+        party_obj = party.objects.filter(time_gte=(timezone.now() + timezone.timedelta(minutes=-15)))
         raid_board_response = skillResponse()
         if raid_bd:
             text = ""
@@ -52,6 +53,11 @@ class SkillResponseView(View):
                 board_text = str(board.s_time.strftime('%H:%M')) + "~" + str(
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
                     board.gym.nick) + " " + raid_obj + "\n"
+                if party_obj:
+                    for i, p in enumerate(party_obj):
+                        if p.raid == board:
+                            users = partyboard.objects.filter(party=p)
+                            board_text += f'[팟{i}/{len(users)}명/{p.time}]'
                 text += board_text
                 card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())
