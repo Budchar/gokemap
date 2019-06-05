@@ -10,7 +10,7 @@ from .skills import req_rsp, skillResponse, singleResponse, simple_text, SkillRe
 def get_party_board():
     text = ""
     # 현재 진행중인 파티 query
-    party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-15))
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-5))
     if party_ing:
         # i는 파티순서, p는 파티 오브젝트
         for i, p in enumerate(party_ing):
@@ -93,7 +93,7 @@ def board(request):
 @csrf_exempt
 def register(request):
     req = req_rsp(request)
-    party_ing = party.objects.filter(time__gte=datetime.datetime.now())
+    party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-5))
     party_num = int(req.params['party']['value'][1]) - 1
     if len(party_ing) < party_num + 1:
         return JsonResponse(simple_text("파티는 "+str(len(party_ing))+"개가 진행중입니다"))

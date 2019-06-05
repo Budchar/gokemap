@@ -39,7 +39,7 @@ class SkillResponseView(View):
     def raid_board(self):
         raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by(
             's_time')
-        party_obj = party.objects.filter(time__gte=(timezone.now() + timezone.timedelta(minutes=-15)))
+        party_obj = party.objects.filter(time__gte=(timezone.now() + timezone.timedelta(minutes=-5)))
         raid_board_response = skillResponse()
         if raid_bd:
             text = ""
