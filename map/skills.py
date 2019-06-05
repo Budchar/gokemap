@@ -18,6 +18,7 @@ block_dict = {
     '명령어': '5c764774e821274ba7898374',
     '유저등록': '5c7766b805aaa75509eab579',
     '파티 생성': '5c7b7540384c550f44a13f86',
+    '파티 참가': '5c7b7540384c550f44a13f86',
 }
 
 
@@ -78,7 +79,8 @@ class SkillResponseView(View):
             if party_ing:
                 # i는 파티순서, p는 파티 오브젝트
                 for i, p in enumerate(party_ing):
-                    party_card_list.append(singleResponse(get_party_board(i, p)).form)
+                    party_board = get_party_board(i, p)
+                    party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
             else:
                 party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())

@@ -122,7 +122,7 @@ def info(request):
 def detail(request):
     req = req_rsp(request)
     poke_sort_cp = pokemon.objects.all()
-    poke_obj = pokemon.objects.filter(id=int(req.params['pokemon']['value'])).first()
+    poke_obj = pokemon.objects.filter(num=int(req.params['pokemon']['value'])).first()
     # 전체 포켓몬에서 cp순으로 sorted함수를 적용하고 이를 index method를 통해 찾고자 하는 query object를 찾는다.
     cp_rank = sorted(poke_sort_cp, key=lambda p: p.cp_cal(15, 15, 15, 25), reverse=True).index(poke_obj)
     types = poke_obj.type_1 + "/" + poke_obj.type_2 if poke_obj.type_2 else poke_obj.type_1
@@ -135,5 +135,5 @@ def detail(request):
                 weak_txt = weak_txt[:weak_txt.find(str(round(value, 2)))-1] + f', {key}' + weak_txt[weak_txt.find(str(round(value, 2)))-1:]
             else:
                 weak_txt += f'{key}({round(value, 2)}배) '
-    output = f"{poke_obj.name} (#{poke_obj.id}) {', '.join(weather_set)}\n\n" + f"타입 {types}\n" + f"약점 {weak_txt}\n" +f"공격 {poke_obj.atk}/방어 {poke_obj.df}/체력 {poke_obj.stm}\n\n" + f"CP(전체 {cp_rank+1}위)\n" + f"Lv20.💯{math.floor(poke_obj.cp_cal(15,15,15,20))}\n" + f"Lv25.💯{math.floor(poke_obj.cp_cal(15,15,15,25))}\n"
+    output = f"{poke_obj.name} (#{poke_obj.num[:3] if len(poke_obj.num)>3 else poke_obj.num}) {', '.join(weather_set)}\n\n" + f"타입 {types}\n" + f"약점 {weak_txt}\n" +f"공격 {poke_obj.atk}/방어 {poke_obj.df}/체력 {poke_obj.stm}\n\n" + f"CP(전체 {cp_rank+1}위)\n" + f"Lv20.💯{math.floor(poke_obj.cp_cal(15,15,15,20))}\n" + f"Lv25.💯{math.floor(poke_obj.cp_cal(15,15,15,25))}\n"
     return JsonResponse(simple_text(output))
