@@ -43,7 +43,7 @@ class mod(SkillResponseView):
         raid_ing_id = extra_data['gym']
         raid_ing_object = raid_ing.objects.filter(id=raid_ing_id)
         if 'raid_poke' in extra_data:
-            poke_object = raid.objects.filter(poke=extra_data['raid_poke']).first()
+            poke_object = raid.objects.filter(poke__num=extra_data['raid_poke']).first()
             raid_ing_object.update(poke=poke_object.id, tier=poke_object.Tier)
         elif 'raid_level' in extra_data:
             raid_ing_object.update(poke=None, tier=extra_data['raid_level'])
@@ -105,6 +105,6 @@ class reportPoke(SkillResponseView):
             raid_ing.objects.create(gym=gym_obj, poke=None, tier=level, s_time=time)
         if ('raid_poke' in extra_data) or ('pokemon' in request.params):
             poke = request.params['pokemon']['value'] if request.params else extra_data['raid_poke']
-            poke_obj = raid.objects.filter(poke__id=poke).first()
+            poke_obj = raid.objects.filter(poke__num=poke).first()
             raid_ing.objects.create(gym=gym_obj, poke=poke_obj, tier=poke_obj.Tier, s_time=time)
         return self.raid_board()

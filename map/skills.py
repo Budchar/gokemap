@@ -37,9 +37,10 @@ class SkillResponseView(View):
         return JsonResponse(skill_response)
 
     def raid_board(self):
-        raid_bd = raid_ing.objects.filter(s_time__gte=(timezone.now() + timezone.timedelta(minutes=-46))).order_by(
+        raid_bd = raid_ing.objects.filter(s_time__gte=(datetime.datetime.now() + datetime.timedelta(minutes=-46))).order_by(
             's_time')
-        party_obj = party.objects.filter(time__gte=(timezone.now() + timezone.timedelta(minutes=-5)))
+        # 현재 진행중인 파티 query
+        party_obj = party.objects.filter(time__gte=(datetime.datetime.now() + datetime.timedelta(minutes=-5)))
         raid_board_response = skillResponse()
         if raid_bd:
             text = ""
@@ -57,6 +58,7 @@ class SkillResponseView(View):
                     (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
                     board.gym.nick) + " " + raid_obj + '\n'
                 text += board_text
+                party_card_list = list()
                 if party_obj:
                     party_text = ''
                     for i, p in enumerate(party_obj):
@@ -70,19 +72,13 @@ class SkillResponseView(View):
                             party_text += f'🔥{val_num}명' if val_num > 0 else ''
                             party_text += f'⚡{ins_num}명' if ins_num > 0 else ''
                             party_text += '\n'
+                        party_board = get_party_board(i, p)
+                        party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가', {},
+                                                                                                            f'팟{i + 1} 참가').share().form)
                     text += party_text
+                else:
+                    party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
                 card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).block_button_message('파티 생성',{'gym_name': board.id}, f'{board.gym.name} 팟 생성').form)
-
-            party_card_list = list()
-            # 현재 진행중인 파티 query
-            party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-15))
-            if party_ing:
-                # i는 파티순서, p는 파티 오브젝트
-                for i, p in enumerate(party_ing):
-                    party_board = get_party_board(i, p)
-                    party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
-            else:
-                party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())
             raid_board_response.carousel(card_list)
             raid_board_response.carousel(party_card_list)
