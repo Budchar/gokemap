@@ -39,29 +39,27 @@ class SkillResponseView(View):
     def raid_board(self):
         raid_bd = raid_ing.objects.filter(s_time__gte=(datetime.datetime.now() + datetime.timedelta(minutes=-46))).order_by(
             's_time')
-        # 현재 진행중인 파티 query
         party_obj = party.objects.filter(time__gte=(datetime.datetime.now() + datetime.timedelta(minutes=-5)))
         raid_board_response = skillResponse()
         if raid_bd:
             text = ""
             card_list = list()
             for board in raid_bd:
+                print(f'board:{board}')
                 if board.poke:
                     raid_obj = str(board.poke.poke)
-                elif board.tier == 1:
-                    raid_obj = "분홍알"
-                elif board.tier == 3:
-                    raid_obj = "노란알"
+                elif board.tier in [1, 2]:
+                    raid_obj = f'분홍알({board.tier}성)'
+                elif board.tier in [3, 4]:
+                    raid_obj = f"노란알({board.tier}성)"
                 elif board.tier == 5:
-                    raid_obj = "오성알"
-                board_text = str(board.s_time.strftime('%H:%M')) + "~" + str(
-                    (board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(
-                    board.gym.nick) + " " + raid_obj + '\n'
+                    raid_obj = f"파란알({board.tier}성)"
+                board_text = str(board.s_time.strftime('%H:%M')) + "~" + str((board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(board.gym.nick) + " " + raid_obj + '\n'
                 text += board_text
-                party_card_list = list()
                 if party_obj:
                     party_text = ''
                     for i, p in enumerate(party_obj):
+                        print(f'p.raid{p.raid}, board{board}')
                         if p.raid == board:
                             party_text += f'{p.time.strftime("%H:%M"):>13} 팟{i + 1} '
                             users = partyboard.objects.filter(party=p)
@@ -72,13 +70,18 @@ class SkillResponseView(View):
                             party_text += f'🔥{val_num}명' if val_num > 0 else ''
                             party_text += f'⚡{ins_num}명' if ins_num > 0 else ''
                             party_text += '\n'
-                        party_board = get_party_board(i, p)
-                        party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가', {},
-                                                                                                            f'팟{i + 1} 참가').share().form)
                     text += party_text
-                else:
-                    party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
                 card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).block_button_message('파티 생성',{'gym_name': board.id}, f'{board.gym.name} 팟 생성').form)
+            party_card_list = list()
+            # 현재 진행중인 파티 query
+            party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-5))
+            if party_ing:
+                # i는 파티순서, p는 파티 오브젝트
+                for i, p in enumerate(party_ing):
+                    party_board = get_party_board(i, p)
+                    party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
+            else:
+                party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
             raid_board_response.input(singleResponse("레이드 현황", text).share().card())
             raid_board_response.carousel(card_list)
             raid_board_response.carousel(party_card_list)

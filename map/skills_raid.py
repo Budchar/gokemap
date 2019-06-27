@@ -13,7 +13,7 @@ class mod_quarter(SkillResponseView):
         yellowEgg_list = list()
         pinkEgg_list = list()
         blueEgg_list.append(singleResponse(description="시간을 정정하시나요?").block_button("레이드 시간 정정", {'gym': extra_data['gym_id']}, f'{gym} 정정').form)
-        for r in raid.objects.filter(Tier=5):
+        for r in raid.objects.filter(Tier=5, ison=1):
             blueEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.num}, f'{gym} {r.poke.name} 정정').form)
         blueEgg_list.append(
             singleResponse("오성알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 5}, f'{gym} 오성알 정정').form)
@@ -21,13 +21,13 @@ class mod_quarter(SkillResponseView):
             singleResponse("노란알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 3}, f'{gym} 노란알 정정').form)
         blueEgg_list.append(
             singleResponse("분홍알").block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_level': 1}, f'{gym} 분홍알 정정').form)
-        for r in raid.objects.filter(Tier=4):
+        for r in raid.objects.filter(Tier=4, ison=1):
             yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.num}, f'{gym} {r.poke.name} 정정').form)
-        for r in raid.objects.filter(Tier=3):
+        for r in raid.objects.filter(Tier=3, ison=1):
             yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.num}, f'{gym} {r.poke.name} 정정').form)
-        for r in raid.objects.filter(Tier=2):
+        for r in raid.objects.filter(Tier=2, ison=1):
             pinkEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.num}, f'{gym} {r.poke.name} 정정').form)
-        for r in raid.objects.filter(Tier=1):
+        for r in raid.objects.filter(Tier=1, ison=1):
             pinkEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬 정정', {'gym': extra_data['gym_id'], 'raid_poke': r.poke.num}, f'{gym} {r.poke.name} 정정').form)
         return resp.carousel(blueEgg_list).carousel(yellowEgg_list).carousel(pinkEgg_list).default
 
@@ -78,18 +78,18 @@ class reportGym(SkillResponseView):
         blueEgg_list = list()
         yellowEgg_list = list()
         pinkEgg_list = list()
-        for r in raid.objects.filter(Tier=5):
+        for r in raid.objects.filter(Tier=5, ison=1):
             blueEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.num}, f'{raid_time} {gym} {r.poke.name}').form)
         blueEgg_list.append(singleResponse("오성알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 5}, f'{raid_time} {gym} 오성알').form)
         blueEgg_list.append(singleResponse("분홍알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 3}, f'{raid_time} {gym} 노란알').form)
         blueEgg_list.append(singleResponse("노란알").block_button('레이드 포켓몬', {'raid_time': raid_time, 'gym': gym, 'raid_level': 1}, f'{raid_time} {gym} 분홍알').form)
-        for r in raid.objects.filter(Tier=4):
+        for r in raid.objects.filter(Tier=4, ison=1):
             yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.num}, f'{raid_time} {gym} {r.poke.name}').form)
-        for r in raid.objects.filter(Tier=3):
+        for r in raid.objects.filter(Tier=3, ison=1):
             yellowEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.num}, f'{raid_time} {gym} {r.poke.name}').form)
-        for r in raid.objects.filter(Tier=2):
+        for r in raid.objects.filter(Tier=2, ison=1):
             pinkEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.num}, f'{raid_time} {gym} {r.poke.name}').form)
-        for r in raid.objects.filter(Tier=1):
+        for r in raid.objects.filter(Tier=1, ison=1):
             pinkEgg_list.append(singleResponse(r.poke.name).block_button('레이드 포켓몬', {'raid_time':raid_time,'gym':gym,'raid_poke':r.poke.num}, f'{raid_time} {gym} {r.poke.name}').form)
         return resp.carousel(blueEgg_list).carousel(yellowEgg_list).carousel(pinkEgg_list).default
 
