@@ -1,7 +1,8 @@
 import requests, bs4
 print('Connecting sys...')
 import sys
-sys.path.append('C:\\Users\\leesehoon\\Desktop\\Gokemap\\gokemap')
+# sys.path.append('/home/budcha/gokemap') #서버용
+sys.path.append('C:\\Users\\leesehoon\\Desktop\\Gokemap\\gokemap')#테스트용
 print('Connecting OS...')
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gokemap.settings")
@@ -15,7 +16,7 @@ def get_now_raid():
     resp = requests.get(f'https://leekduck.com/boss/')
     resp.raise_for_status()
 
-    resp.encoding = 'euc-kr'
+    resp.encoding = 'utf-8'
     html = resp.text
 
     bs = bs4.BeautifulSoup(html, 'html.parser')
