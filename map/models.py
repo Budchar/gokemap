@@ -154,3 +154,40 @@ class event(models.Model):
 class temp(models.Model):
     date = models.DateField()
     description = models.TextField()
+
+
+class move(models.Model):
+    name = models.CharField(max_length=16)
+    name_eng = models.CharField(max_length=32)
+    Move_Category = models.CharField(max_length=16)
+    Move_Type = models.CharField(max_length=16)
+    Effect = models.CharField(max_length=128)
+    PVE_Base_Power = models.IntegerField(default=-1)
+    PVE_Damage_Per_Second = models.FloatField(default=-1)
+    PVE_Damage_Window = models.FloatField(default=-1)
+    PVE_Move_Cooldown = models.FloatField(default=-1)
+    PVP_Base_Power = models.FloatField(default=-1)
+
+
+class fastMove(models.Model):
+    default_info = models.ForeignKey(move, on_delete=models.CASCADE, null=True)
+    PVE_Energy_Delta = models.IntegerField(default=-1)
+    PVE_Energy_Per_Second = models.FloatField(default=-1)
+    PVP_Duration = models.IntegerField(default=-1)
+    PVP_Energy_Delta = models.IntegerField(default=-1)
+    PVP_Move_Cooldown = models.FloatField(default=-1)
+
+
+class chargeMove(models.Model):
+    default_info = models.ForeignKey(move, on_delete=models.CASCADE, null=True)
+    PVE_Charge_Energy = models.IntegerField(default=-1)
+    PVE_Damage_per_Energy = models.FloatField(default=-1)
+    PVE_DPEDPS = models.FloatField(default=-1)
+    PVP_Charge_Energy = models.FloatField(default=-1)
+    PVP_Damage_Per_Energy = models.FloatField(default=-1)
+
+
+class poke_move(models.Model):
+    pokemon = models.ForeignKey(pokemon, on_delete=models.CASCADE)
+    move = models.ForeignKey(move, on_delete=models.CASCADE)
+    isLegacy = models.BooleanField(default=False)

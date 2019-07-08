@@ -13,7 +13,7 @@ print('Connecting models...')
 from map.models import pokemon, raid
 
 def get_now_raid():
-    resp = requests.get(f'https://leekduck.com/boss/')
+    resp = requests.get("https://leekduck.com/boss/")
     resp.raise_for_status()
 
     resp.encoding = 'utf-8'

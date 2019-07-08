@@ -122,12 +122,12 @@ def info(request):
 def detail(request):
     req = req_rsp(request)
     poke_sort_cp = pokemon.objects.all()
-    poke_obj = pokemon.objects.filter(num=int(req.params['pokemon']['value'])).first()
+    poke_obj = pokemon.objects.filter(num=req.params['pokemon']['value']).first()
     # 전체 포켓몬에서 cp순으로 sorted함수를 적용하고 이를 index method를 통해 찾고자 하는 query object를 찾는다.
     cp_rank = sorted(poke_sort_cp, key=lambda p: p.cp_cal(15, 15, 15, 25), reverse=True).index(poke_obj)
-    types = poke_obj.type_1 + "/" + poke_obj.type_2 if poke_obj.type_2 else poke_obj.type_1
-    weak_dict = weak(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 else weak(poke_obj.type_1)
-    weather_set = weather(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 else weather(poke_obj.type_1)
+    types = poke_obj.type_1 + "/" + poke_obj.type_2 if poke_obj.type_2 != 'NULL' else poke_obj.type_1
+    weak_dict = weak(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 != 'NULL' else weak(poke_obj.type_1)
+    weather_set = weather(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 != 'NULL'else weather(poke_obj.type_1)
     weak_txt = ""
     for key, value in sorted(weak_dict.items(), key=lambda p: p[1], reverse=True):
         if value > 1:
