@@ -89,7 +89,7 @@ if __name__ == '__main__':
             move_table = bs.select('table.move-table>tr')
             move_info = move_vals(move_table).getMove()
             default_value_dict = {f:move_info[f] for f in move_default_fields if f in move_info and move_info[f]}
-            move.objects.filter(id=move_obj.id).first().update(**default_value_dict)
+            move.objects.filter(id=move_obj.id).update(**default_value_dict)
             if move_info['Move_Category'] == 'Fast Move':
                 detail_value_dict = {f:move_info[f] for f in move_fast_fields if f in move_info and move_info[f]}
                 fastMove.objects.update_or_create(default_info=move_obj, defaults=detail_value_dict)

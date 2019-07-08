@@ -1,8 +1,9 @@
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+import itertools
 import math
-from .models import pokemon
+from .models import pokemon, poke_move, chargeMove, fastMove, move
 from .skills import req_rsp, skillResponse, singleResponse, simple_text
 
 
@@ -124,6 +125,9 @@ def detail(request):
     poke_sort_cp = pokemon.objects.all()
     poke_obj = pokemon.objects.filter(num=req.params['pokemon']['value']).first()
     # 전체 포켓몬에서 cp순으로 sorted함수를 적용하고 이를 index method를 통해 찾고자 하는 query object를 찾는다.
+    fast_move = poke_move.objects.filter(pokemon=poke_obj,move__Move_Type='Fast Move')
+    charge_move = poke_move.objects.filter(pokemon=poke_obj, move__Move_Type='Charge Move')
+    move_comb = [f"{c[0].move.name}/{c[1].move.name}" for c in list(itertools.product(fast_move, charge_move))]
     cp_rank = sorted(poke_sort_cp, key=lambda p: p.cp_cal(15, 15, 15, 25), reverse=True).index(poke_obj)
     types = poke_obj.type_1 + "/" + poke_obj.type_2 if poke_obj.type_2 != 'NULL' else poke_obj.type_1
     weak_dict = weak(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 != 'NULL' else weak(poke_obj.type_1)
@@ -136,4 +140,5 @@ def detail(request):
             else:
                 weak_txt += f'{key}({round(value, 2)}배) '
     output = f"{poke_obj.name} (#{poke_obj.num[:3] if len(poke_obj.num)>3 else poke_obj.num}) {', '.join(weather_set)}\n\n" + f"타입 {types}\n" + f"약점 {weak_txt}\n" +f"공격 {poke_obj.atk}/방어 {poke_obj.df}/체력 {poke_obj.stm}\n\n" + f"CP(전체 {cp_rank+1}위)\n" + f"Lv20.💯{math.floor(poke_obj.cp_cal(15,15,15,20))}\n" + f"Lv25.💯{math.floor(poke_obj.cp_cal(15,15,15,25))}\n"
+    output += f"포켓몬 스킬\n" + "\n".join(move_comb)
     return JsonResponse(simple_text(output))
