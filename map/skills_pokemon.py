@@ -133,6 +133,7 @@ def dps(poke_obj, c):
     cdps = cdmg/cdur
     ceps = ce/cdur
     dps0 = (fdps*ceps+cdps*feps)/(ceps+feps)
+    dps1 = (cdps-fdps)*(0.5-(0.5*ce+0.5*fe)/poke_obj.stm)*(900/poke_obj.df)/(ceps+feps)
     # fm_stab = 1.25 if type_choice[fm.move.Move_Type] == poke_obj.type_1 or type_choice[fm.move.Move_Type] == poke_obj.type_2 else 1
     # cm_stab = 1.25 if type_choice[cm.move.Move_Type] == poke_obj.type_1 or type_choice[
     #     cm.move.Move_Type] == poke_obj.type_2 else 1
@@ -141,7 +142,7 @@ def dps(poke_obj, c):
     # fm_cool = fm.move.PVE_Move_Cooldown * math.ceil(100/fastMove.objects.filter(default_info=fm.move).first().PVE_Energy_Delta)
     # cm_cool = cm.move.PVE_Move_Cooldown * chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
     # dmg = (fm_dmg + cm_dmg)/(fm_cool+cm_cool)
-    return dps0
+    return dps0+dps1
 
 
 @csrf_exempt
