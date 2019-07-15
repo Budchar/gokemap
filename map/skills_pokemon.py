@@ -145,7 +145,7 @@ def detail(request):
     # 전체 포켓몬에서 cp순으로 sorted함수를 적용하고 이를 index method를 통해 찾고자 하는 query object를 찾는다.
     fast_move = poke_move.objects.filter(pokemon=poke_obj,move__Move_Category='Fast Move')
     charge_move = poke_move.objects.filter(pokemon=poke_obj, move__Move_Category='Charge Move')
-    move_comb = [f"{c[0].move.name}/{c[1].move.name} dps:{dps(poke_obj, c)}" for c in list(itertools.product(fast_move, charge_move))]
+    move_comb = [f"{c[0].move.name}/{c[1].move.name} dps:{dps(poke_obj, c):0.3f}" for c in list(itertools.product(fast_move, charge_move))]
     cp_rank = sorted(poke_sort_cp, key=lambda p: p.cp_cal(15, 15, 15, 25), reverse=True).index(poke_obj)
     types = poke_obj.type_1 + "/" + poke_obj.type_2 if poke_obj.type_2 != 'NULL' else poke_obj.type_1
     weak_dict = weak(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 != 'NULL' else weak(poke_obj.type_1)
