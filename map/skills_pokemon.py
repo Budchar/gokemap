@@ -113,6 +113,22 @@ def weather(type_1, type_2=False):
         return weather_match[type_1]
 
 
+def dps(poke_obj, c):
+    type_choice = {'Normal': '노말', 'Fire': '불꽃', 'Water': '물', 'Grass': '풀', 'Electric': '전기',
+                   'Ice': '얼음', 'Fighting': '격투', 'Poison': '독', 'Ground': '땅', 'Flying': '비행', 'Psychic': '에스퍼',
+                   'Bug': '벌레', 'Rock': '바위', 'Ghost': '고스트', 'Dragon': '드래곤', 'Dark': '악', 'Steel': '강철',
+                   'Fairy': '페어리'}
+    fm = c[0]
+    cm = c[1]
+    fm_stab = 1.25 if type_choice[fm.move.Move_Type] == poke_obj.type_1 or type_choice[fm.move.Move_Type] == poke_obj.type_2 else 1
+    cm_stab = 1.25 if type_choice[cm.move.Move_Type] == poke_obj.type_1 or type_choice[
+        cm.move.Move_Type] == poke_obj.type_2 else 1
+    fm_dmg = math.floor(poke_obj.atk/200*fm.move.PVE_Base_Power*fm_stab)+1
+    cm_dmg = (math.floor(poke_obj.atk/200*cm.move.PVE_Base_Power*cm_stab)+1)*chargeMove.objects.filter(default_info=cm).first().PVE_Charge_Energy
+    dmg = fm_dmg + cm_dmg
+    return dmg
+
+
 @csrf_exempt
 def info(request):
     req = req_rsp(request)
@@ -127,7 +143,7 @@ def detail(request):
     # 전체 포켓몬에서 cp순으로 sorted함수를 적용하고 이를 index method를 통해 찾고자 하는 query object를 찾는다.
     fast_move = poke_move.objects.filter(pokemon=poke_obj,move__Move_Category='Fast Move')
     charge_move = poke_move.objects.filter(pokemon=poke_obj, move__Move_Category='Charge Move')
-    move_comb = [f"{c[0].move.name}/{c[1].move.name} dps:{c[0].move.PVE_Damage_Per_Second*c[1].move.PVE_Damage_Per_Second}" for c in list(itertools.product(fast_move, charge_move))]
+    move_comb = [f"{c[0].move.name}/{c[1].move.name} dps:{dps(poke_obj, c)}" for c in list(itertools.product(fast_move, charge_move))]
     cp_rank = sorted(poke_sort_cp, key=lambda p: p.cp_cal(15, 15, 15, 25), reverse=True).index(poke_obj)
     types = poke_obj.type_1 + "/" + poke_obj.type_2 if poke_obj.type_2 != 'NULL' else poke_obj.type_1
     weak_dict = weak(poke_obj.type_1.strip(), poke_obj.type_2.strip()) if poke_obj.type_2 != 'NULL' else weak(poke_obj.type_1)
