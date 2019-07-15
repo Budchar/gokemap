@@ -120,30 +120,29 @@ def dps(poke_obj, c):
                    'Fairy': '페어리'}
     fm = c[0]
     cm = c[1]
-    f_obj = fastMove.objects.filter(default_info=fm.move).first()
-    c_obj = chargeMove.objects.filter(default_info=cm.move).first()
-    fdmg = fm.move.PVE_Base_Power
-    cdmg = cm.move.PVE_Base_Power
-    fe = f_obj.PVE_Energy_Delta
-    ce = round(100/c_obj.PVE_Charge_Energy, 2)
-    fdur = fm.move.PVE_Move_Cooldown
-    cdur = cm.move.PVE_Move_Cooldown
-    fdps = fdmg/fdur
-    feps = fe/fdur
-    cdps = cdmg/cdur
-    ceps = ce/cdur
-    dps0 = (fdps*ceps+cdps*feps)/(ceps+feps)
-    dps1 = (cdps-fdps)*(0.5-(0.5*ce+0.5*fe)/poke_obj.stm)*(900/poke_obj.df)/(ceps+feps)
-    # fm_stab = 1.25 if type_choice[fm.move.Move_Type] == poke_obj.type_1 or type_choice[fm.move.Move_Type] == poke_obj.type_2 else 1
-    # cm_stab = 1.25 if type_choice[cm.move.Move_Type] == poke_obj.type_1 or type_choice[
-    #     cm.move.Move_Type] == poke_obj.type_2 else 1
-    # fm_dmg = math.floor(poke_obj.atk/200*fm.move.PVE_Base_Power*fm_stab)+1
-    # cm_dmg = (math.floor(poke_obj.atk/200*cm.move.PVE_Base_Power*cm_stab)+1)*chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
-    # fm_cool = fm.move.PVE_Move_Cooldown * math.ceil(100/fastMove.objects.filter(default_info=fm.move).first().PVE_Energy_Delta)
-    # cm_cool = cm.move.PVE_Move_Cooldown * chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
-    # dmg = (fm_dmg + cm_dmg)/(fm_cool+cm_cool)
-    print(dps0, dps1)
-    return dps0
+    # f_obj = fastMove.objects.filter(default_info=fm.move).first()
+    # c_obj = chargeMove.objects.filter(default_info=cm.move).first()
+    # fdmg = fm.move.PVE_Base_Power
+    # cdmg = cm.move.PVE_Base_Power
+    # fe = f_obj.PVE_Energy_Delta
+    # ce = round(100/c_obj.PVE_Charge_Energy, 2)
+    # fdur = fm.move.PVE_Move_Cooldown
+    # cdur = cm.move.PVE_Move_Cooldown
+    # fdps = fdmg/fdur
+    # feps = fe/fdur
+    # cdps = cdmg/cdur
+    # ceps = ce/cdur
+    # dps0 = (fdps*ceps+cdps*feps)/(ceps+feps)
+    # dps1 = (cdps-fdps)*(0.5-(0.5*ce+0.5*fe)/poke_obj.stm)*(900/poke_obj.df)/(ceps+feps)
+    fm_stab = 1.25 if type_choice[fm.move.Move_Type] == poke_obj.type_1 or type_choice[fm.move.Move_Type] == poke_obj.type_2 else 1
+    cm_stab = 1.25 if type_choice[cm.move.Move_Type] == poke_obj.type_1 or type_choice[
+        cm.move.Move_Type] == poke_obj.type_2 else 1
+    fm_dmg = math.floor(0.5*poke_obj.atk/poke_obj.df*fm.move.PVE_Base_Power*fm_stab)+1
+    cm_dmg = (math.floor(0.5*poke_obj.atk/poke_obj.df*cm.move.PVE_Base_Power*cm_stab)+1)*chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
+    fm_cool = fm.move.PVE_Move_Cooldown * math.ceil(100/fastMove.objects.filter(default_info=fm.move).first().PVE_Energy_Delta)
+    cm_cool = cm.move.PVE_Move_Cooldown * chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
+    dmg = (fm_dmg + cm_dmg)/(fm_cool+cm_cool)
+    return dmg
 
 
 @csrf_exempt
