@@ -138,10 +138,11 @@ def dps(poke_obj, c):
     cm_stab = 1.25 if type_choice[cm.move.Move_Type] == poke_obj.type_1 or type_choice[
         cm.move.Move_Type] == poke_obj.type_2 else 1
     fm_dmg = math.floor(0.5*poke_obj.atk/poke_obj.df*fm.move.PVE_Base_Power*fm_stab)+1
-    cm_dmg = (math.floor(0.5*poke_obj.atk/poke_obj.df*cm.move.PVE_Base_Power*cm_stab)+1)*chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
-    fm_cool = fm.move.PVE_Move_Cooldown * math.ceil(100/fastMove.objects.filter(default_info=fm.move).first().PVE_Energy_Delta)
-    cm_cool = cm.move.PVE_Move_Cooldown * chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
-    dmg = (fm_dmg + cm_dmg)/(fm_cool+cm_cool)
+    cm_dmg = (math.floor(0.5*poke_obj.atk/poke_obj.df*cm.move.PVE_Base_Power*cm_stab)+1)
+    fm_count = math.ceil(100/chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy/fastMove.objects.filter(default_info=fm.move).first().PVE_Energy_Delta)
+    fm_cool = fm.move.PVE_Move_Cooldown
+    cm_cool = cm.move.PVE_Move_Cooldown
+    dmg = (fm_dmg*fm_count + cm_dmg)/(fm_cool*fm_count+cm_cool)
     return dmg
 
 
