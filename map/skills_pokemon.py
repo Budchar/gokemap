@@ -125,7 +125,9 @@ def dps(poke_obj, c):
         cm.move.Move_Type] == poke_obj.type_2 else 1
     fm_dmg = math.floor(poke_obj.atk/200*fm.move.PVE_Base_Power*fm_stab)+1
     cm_dmg = (math.floor(poke_obj.atk/200*cm.move.PVE_Base_Power*cm_stab)+1)*chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
-    dmg = fm_dmg + cm_dmg
+    fm_cool = fm.move.PVE_Move_Cooldown * math.floor(100/fastMove(default_info=fm.move).PVE_Energy_Delta)
+    cm_cool = fm.move.PVE_Move_Cooldown *chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
+    dmg = (fm_dmg + cm_dmg)/(fm_cool+cm_cool)
     return dmg
 
 
