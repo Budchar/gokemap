@@ -142,7 +142,8 @@ def dps(poke_obj, c):
     # fm_cool = fm.move.PVE_Move_Cooldown * math.ceil(100/fastMove.objects.filter(default_info=fm.move).first().PVE_Energy_Delta)
     # cm_cool = cm.move.PVE_Move_Cooldown * chargeMove.objects.filter(default_info=cm.move).first().PVE_Charge_Energy
     # dmg = (fm_dmg + cm_dmg)/(fm_cool+cm_cool)
-    return dps0+dps1
+    print(dps0, dps1)
+    return dps0
 
 
 @csrf_exempt
