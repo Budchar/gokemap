@@ -21,14 +21,14 @@ def board(request):
     for e in event_now:
         time_delta = e.end_time - timezone.now()
         e_time = str(e.end_time.strftime('%m/%d %H:%M')) + " 종료\n" + "(종료까지 " + str(time_delta).replace("days", "일").replace("day", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
-        cards_after.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}, messagetext='테스트').share().form)
+        cards_after.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}, messagetext=e.description).share().form)
     # 만약 현재 진행중인 없을 때를 방지하기 위한 코드
     if cards_after:
         resp.carousel(cards_after)
     for e in event_upcoming[:10]:
         time_delta = e.start_time - timezone.now()
         e_time = f"{str(e.start_time.strftime('%m/%d %H:%M'))} ~ {str(e.end_time.strftime('%m/%d %H:%M'))}\n" + "(시작까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
-        cards_before.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}, messagetext='테스트').share().form)
+        cards_before.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}, messagetext=e.description).share().form)
     # 진행될 이벤트가 없을 때를 위한 코드
     if cards_before:
         resp.carousel(cards_before)
@@ -38,7 +38,7 @@ def board(request):
         for e in event_upcoming[10:]:
             time_delta = e.start_time - timezone.now()
             e_time = f"{str(e.start_time.strftime('%m/%d %H:%M'))} ~ {str(e.end_time.strftime('%m/%d %H:%M'))}\n" + "(시작까지 " + str(time_delta).replace("days", "일").replace(":","시간 ",1).replace(":","분 ").replace(".","초")[:-6] + ")"
-            cards_third.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}, messagetext='테스트').share().form)
+            cards_third.append(singleResponse(e.title, e_time, e.img_url).block_button("이벤트 상세정보", {"event_id":e.id}, messagetext=e.description).share().form)
         resp.carousel(cards_third)
     return JsonResponse(resp.default)
 
