@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.views.generic import View
-from .models import raid_ing, party, partyboard, research
+from .models import raid_ing, party, partyboard, raid
 
 block_dict = {
     '이벤트 상세정보': '5c89f9ac5f38dd4767218f9d',
@@ -41,10 +41,13 @@ class SkillResponseView(View):
             's_time')
         party_obj = party.objects.filter(time__gte=(datetime.datetime.now() + datetime.timedelta(minutes=-5)))
         raid_board_response = skillResponse()
-        research_objs = research.objects.all()
-        research_text = ""
-        for obj in research_objs:
-            research_text += f"{obj.todo}\n -{obj.rwd}"
+        raid_dict = {5:[],4:[],3:[],2:[],1:[]}
+        raid_objs = raid.objects.filter(ison=True)
+        for raid_obj in raid_objs:
+            raid_dict[raid_obj.Tier].append(raid_obj.poke.name)
+        raid_text = ""
+        for k, v in raid_dict.items():
+            raid_text += f"{k}\n{','.join(v)}"
         if raid_bd:
             text = ""
             card_list = list()
@@ -86,8 +89,7 @@ class SkillResponseView(View):
                     party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
             else:
                 party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
-            # main_list = [singleResponse("레이드 현황", text).share().form, singleResponse("리서치 목록", research_text).share().form]
-            raid_board_response.input(singleResponse("레이드 현황", f"{text}\n\n{research_text}").share().card())
+            raid_board_response.input(singleResponse("레이드 현황", f"{text}\n{raid_text}").share().card())
             raid_board_response.carousel(card_list)
             raid_board_response.carousel(party_card_list)
             raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')
