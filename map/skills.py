@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.views.generic import View
-from .models import raid_ing, party, partyboard
+from .models import raid_ing, party, partyboard, research
 
 block_dict = {
     '이벤트 상세정보': '5c89f9ac5f38dd4767218f9d',
@@ -41,6 +41,10 @@ class SkillResponseView(View):
             's_time')
         party_obj = party.objects.filter(time__gte=(datetime.datetime.now() + datetime.timedelta(minutes=-5)))
         raid_board_response = skillResponse()
+        research_objs = research.objects.all()
+        research_text = ""
+        for obj in research_objs:
+            research_text += f"{obj.todo}\n -{obj.rwd}"
         if raid_bd:
             text = ""
             card_list = list()
@@ -49,11 +53,11 @@ class SkillResponseView(View):
                 if board.poke:
                     raid_obj = str(board.poke.poke)
                 elif board.tier in [1, 2]:
-                    raid_obj = f'분홍알({board.tier}성)'
+                    raid_obj = f'{board.tier}성'
                 elif board.tier in [3, 4]:
-                    raid_obj = f"노란알({board.tier}성)"
+                    raid_obj = f"{board.tier}성"
                 elif board.tier == 5:
-                    raid_obj = f"파란알({board.tier}성)"
+                    raid_obj = f"{board.tier}성"
                 board_text = str(board.s_time.strftime('%H:%M')) + "~" + str((board.s_time + timedelta(minutes=45)).strftime('%H:%M')) + " " + str(board.gym.nick) + " " + raid_obj + '\n'
                 text += board_text
                 if party_obj:
@@ -82,7 +86,8 @@ class SkillResponseView(View):
                     party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
             else:
                 party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
-            raid_board_response.input(singleResponse("레이드 현황", text).share().card())
+            main_list = [singleResponse("레이드 현황", text).share().form, singleResponse("리서치 목록", research_text).share().form]
+            raid_board_response.carousel(main_list)
             raid_board_response.carousel(card_list)
             raid_board_response.carousel(party_card_list)
             raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')

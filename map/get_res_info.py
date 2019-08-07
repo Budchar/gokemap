@@ -40,6 +40,5 @@ if __name__ == '__main__':
     print('Adding now Research List...')
     id = 1
     for k, values in raiding_poke.items():
-        for v in values:
-            research.objects.create(id=id,todo=k,rwd=v)
-            id +=1
+        research.objects.create(id=id,todo=k,rwd=','.join(values))
+        id +=1
