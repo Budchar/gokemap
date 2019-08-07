@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^user_enroll/', skills_user.user_enroll),
     url(r'^team_enroll/', skills_user.team_enroll),
     url(r'^research_post/', skills_research.post),
-    url(r'^research_board/', skills_research.board),
+    url(r'^research_board/', csrf_exempt(skills_research.board.as_view())),
     url(r'^party_post/', csrf_exempt(skills_party.post.as_view())),
     url(r'^party_board/', skills_party.board),
     url(r'^party_register/', skills_party.register),
