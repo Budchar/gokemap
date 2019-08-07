@@ -47,7 +47,7 @@ class SkillResponseView(View):
             raid_dict[raid_obj.Tier].append(raid_obj.poke.name)
         raid_text = ""
         for k, v in raid_dict.items():
-            raid_text += f"{k}\n{','.join(v)}"
+            raid_text += f"{k}성\n{','.join(v)}\n"
         if raid_bd:
             text = ""
             card_list = list()
