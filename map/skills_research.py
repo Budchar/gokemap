@@ -2,7 +2,7 @@ import datetime
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from .models import temp
+from .models import temp, research
 from .skills import req_rsp, skillResponse, singleResponse, simple_text
 
 
@@ -19,5 +19,10 @@ def post(request):
 @csrf_exempt
 def board(request):
     research_bd = temp.objects.filter(date=(timezone.now().date())).first()
+    research_objs = research.objects.all()
     rsch = getattr(research_bd, "description", "오늘은 리서치가 아직 제보되지 않았네요 ㅠㅁㅠ")
+    research_text = ""
+    for research_obj in research_objs:
+        research_text += f"{research_obj.todo}\n -{research_obj.rwd}"
+
     return JsonResponse(simple_text(rsch))
