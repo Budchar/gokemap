@@ -79,19 +79,19 @@ class SkillResponseView(View):
                             party_text += '\n'
                     text += party_text
                 card_list.append(singleResponse(board_text.rstrip(),thumbnail=board.gym.img_url).block_button('레이드 정정', {'gym_id': board.id}).block_button_message('파티 생성',{'gym_name': board.id}, f'{board.gym.name} 팟 생성').form)
-            party_card_list = list()
+            # party_card_list = list()
             # 현재 진행중인 파티 query
-            party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-5))
-            if party_ing:
+            # party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-5))
+            # if party_ing:
                 # i는 파티순서, p는 파티 오브젝트
-                for i, p in enumerate(party_ing):
-                    party_board = get_party_board(i, p)
-                    party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
-            else:
-                party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
-            raid_board_response.input(singleResponse("레이드 현황", f"{text}\n{raid_text}").share().card())
+                # for i, p in enumerate(party_ing):
+                #     party_board = get_party_board(i, p)
+                    # party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
+            # else:
+                # party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
+            raid_board_response.input(singleResponse("레이드 현황", f"{text}").share().card())
             raid_board_response.carousel(card_list)
-            raid_board_response.carousel(party_card_list)
+            raid_board_response.input(singleResponse("레이드 목록", f"{raid_text}").share().card())
             raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')
             raid_board_response.quickReply("레이드 제보", "레이드 제보", "레이드 포켓몬")
             return raid_board_response.default
