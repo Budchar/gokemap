@@ -23,6 +23,6 @@ def board(request):
     # rsch = getattr(research_bd, "description", "오늘은 리서치가 아직 제보되지 않았네요 ㅠㅁㅠ")
     research_text = ""
     for research_obj in research_objs:
-        research_text += f"{research_obj.todo}\n -{research_obj.rwd}"
+        research_text += f"{research_obj.todo}\n -{research_obj.rwd}\n"
 
     return JsonResponse(simple_text(research_text))
