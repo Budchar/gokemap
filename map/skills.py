@@ -91,7 +91,7 @@ class SkillResponseView(View):
                 # party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
             raid_board_response.input(singleResponse("레이드 현황", f"{text}").share().card())
             raid_board_response.carousel(card_list)
-            raid_board_response.input(singleResponse("레이드 목록", f"{raid_text}").share().card())
+            raid_board_response.carousel([singleResponse("레이드 목록", f"{raid_text}").share().form])
             raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')
             raid_board_response.quickReply("레이드 제보", "레이드 제보", "레이드 포켓몬")
             return raid_board_response.default
