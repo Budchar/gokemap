@@ -28,7 +28,7 @@ class pokemon(models.Model):
     female_rate = models.FloatField(default=-1)
     second_candy = models.CharField(max_length=15, default='미정')
     buddy_distance = models.CharField(max_length=6, default='미정')
-    evolution_candy =  models.CharField(max_length=15, default='미정')
+    evolution_candy = models.CharField(max_length=15, default='미정')
     group = models.IntegerField(default=-1)
     lv20_000 = models.IntegerField(default=-1)
     lv20_555 = models.IntegerField(default=-1)
@@ -56,7 +56,7 @@ class pokemon(models.Model):
 
 
 class research(models.Model):
-    to_do = models.CharField(max_length=50, default="미정")
+    todo = models.CharField(max_length=1000, default="미정")
     rwd = models.CharField(max_length=20, default="미정")
 
 
