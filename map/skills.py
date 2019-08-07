@@ -86,8 +86,8 @@ class SkillResponseView(View):
                     party_card_list.append(singleResponse(description=party_board).block_button_message('파티 참가',{},f'팟{i+1} 참가').share().form)
             else:
                 party_card_list.append(singleResponse('파티가 없네요 만들어보시는건 어떨까요?').form)
-            main_list = [singleResponse("레이드 현황", text).share().form, singleResponse("리서치 목록", research_text).share().form]
-            raid_board_response.carousel(main_list)
+            # main_list = [singleResponse("레이드 현황", text).share().form, singleResponse("리서치 목록", research_text).share().form]
+            raid_board_response.input(singleResponse("레이드 현황", f"{text}\n\n{research_text}").share().card())
             raid_board_response.carousel(card_list)
             raid_board_response.carousel(party_card_list)
             raid_board_response.quickReply("새로고침", "레이드 현황", '레이드 현황')
