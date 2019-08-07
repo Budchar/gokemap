@@ -22,8 +22,7 @@ class board(SkillResponseView):
         research_text = ""
         for research_obj in research_objs:
             research_text += f"{research_obj.todo}\n -{research_obj.rwd}\n"
-
-        return skillResponse.input(singleResponse("리서치 목록", f"{research_text}").share().card()).default
+        return skillResponse().input(singleResponse("리서치 목록", f"{research_text}").share().card()).default
 
 # @csrf_exempt
 # def board(request):
