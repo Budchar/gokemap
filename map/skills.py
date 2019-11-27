@@ -1,6 +1,8 @@
 import json
 import datetime
 from datetime import timedelta
+from functools import wraps
+
 from django.utils import timezone
 from django.db.models import Sum
 from django.http import JsonResponse
@@ -24,14 +26,29 @@ block_dict = {
 
 class SkillResponseView(View):
     def make_response(self, request):
+        '''
+        I = request(.req_rsp)
+        O = skill response(dict)
+        받은 .req_rsp를 바탕으로 skill response를 작성
+        '''
         resp = skillResponse()
         return resp
 
     def decode_request(self, request):
+        '''
+        I = request(django httpRequest object, Binary Json request)
+        O = skill response형식(dict)
+        I를 .req_rsp(dict)으로 바꾼 후, .res_rsp를 make_response로 전달
+        '''
         decoded_request = req_rsp(request)
         return self.make_response(decoded_request)
 
     def post(self, request):
+        '''
+        I = request(django httpRequest object, Binary Json request)
+        O = response(django jsonResponse object)
+        I를 decode_request()에 넣어 return한 값을 jsonresponse로 보낸다.
+        '''
         # 받은 json request 풀어보기
         skill_response = self.decode_request(request)
         return JsonResponse(skill_response)
@@ -106,13 +123,17 @@ class SkillResponseView(View):
 
 class req_rsp:
     def __init__(self, request):
-        # json data decode
-        json_str = request.body.decode('utf-8')
-        # 디코드한 json data 풀어보기
-        self.received_json_data = json.loads(json_str)
-        print(self.received_json_data)
-        # json 파일에서 입력값을 전달해주는 param 접근
+        '''
+        I = request(django httpRequest object, Binary Json request)
+        '''
+        # json_str / bson -> json
+        self.json_str = request.body.decode('utf-8')
+        # received_json_data / json -> python dict
+        self.received_json_data = json.loads(self.json_str)
+        print(self.received_json_data, flush=True)
+        # params / 챗봇에서 보내주는 파라미터들
         self.params = self.received_json_data['action']['detailParams']
+        # user_id / 챗봇을 발화한 유저 id
         self.user_id = self.received_json_data['userRequest']['user']['id']
 
     def client_data(self):
@@ -158,18 +179,18 @@ class skillResponse:
         })
         return self
 
-    def quickReply(self, label, message, block, extra=""):
-        self.default["template"]["quickReplies"].append(
-            {
-                "action": "block",
-                "label": label,
-                "messageText": message,
-                "data": {
-                    "blockId": block_dict[block],
-                    "extra": extra
-                }
+    def quickReply(self, label, message, block, extra=None):
+        template = {
+            "action": "block",
+            "label": label,
+            "messageText": message,
+            "data": {
+                "blockId": block_dict[block],
             }
-        )
+        }
+        if extra:
+            template['data']['extra'] = extra
+        self.default["template"]["quickReplies"].append(template)
         return self
 
 
@@ -182,43 +203,48 @@ class singleResponse:
         if description:
             self.form["description"] = description
         if thumbnail:
-            self.form['thumbnail'] = {'imageUrl':thumbnail,
+            self.form['thumbnail'] = {'imageUrl': thumbnail,
                                       # 'link':{'type':"WEB",'webUrl':thumbnail}
                                       }
 
-    def make_button(self):
-        if self.onoff == 1:
-            return
-        self.onoff = 1
-        self.form['buttons'] = list()
-        return
+    def make_button(original_function):
+        @wraps(original_function)
+        def wrapper_function(self, *args, **kwargs):  # 1
+            if self.onoff != 1:
+                self.form['buttons'] = list()
+                self.onoff = 1
+            return original_function(self, *args, **kwargs)  # 2
 
+        return wrapper_function
+
+    @make_button
     def share(self):
-        self.make_button()
         self.form['buttons'].append({'action': 'share', 'label': '공유하기'})
         return self
 
-    def block_button(self, block, extra, messagetext=""):
-        self.make_button()
-        self.form['buttons'].append({
-                'action': 'block',
-                'label': block,
-                'messageText': messagetext if messagetext else block,
-                'blockId': block_dict[block],
-                'extra': extra
-            }
-        )
+    @make_button
+    def block_button(self, block, extra="", messagetext="", label=""):
+        template = {
+            'action': 'block',
+            'label': label if label else block,
+            'messageText': messagetext if messagetext else block,
+            'blockId': block_dict[block],
+        }
+        if extra:
+            template['extra'] = extra
+        self.form['buttons'].append(template)
         return self
 
-    def block_button_message(self, block, extra, messagetext=""):
-        self.make_button()
-        self.form['buttons'].append({
-                'action': 'message',
-                'label': block,
-                'messageText': messagetext if messagetext else block,
-                'extra': extra
-            }
-        )
+    @make_button
+    def block_button_message(self, block, extra="", messagetext="", label=""):
+        template = {
+            'action': 'message',
+            'label': label if label else block,
+            'messageText': messagetext if messagetext else block,
+        }
+        if extra:
+            template['extra'] = extra
+        self.form['buttons'].append(template)
         return self
 
     def card(self):
@@ -227,18 +253,21 @@ class singleResponse:
 
 # 간단한 텍스트 아웃풋을 만드려면 simple_text를 이용하자
 def simple_text(text):
-        resp = skillResponse()
-        form = {
-            "simpleText": {
-                'text': text
-            }
+    '''
+    간단한 텍스트 아웃풋을 생성하는 함수
+    '''
+    resp = skillResponse()
+    form = {
+        "simpleText": {
+            'text': text
         }
-        return resp.input(form).default
+    }
+    return resp.input(form).default
 
 
 def simple_image(imgUrl, altText):
     return {
-        "simpleImage":{
+        "simpleImage": {
             "imageUrl": imgUrl,
             "altText": altText
         }
