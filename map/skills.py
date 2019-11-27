@@ -103,7 +103,7 @@ class SkillResponseView(View):
                     '레이드 정정',
                     {
                         'gym_id': board.id}).block_button_message(
-                    '파티 생성', {'gym_name': board.id}, f'{board.gym.name} 팟 생성').form)
+                    '파티 생성', {'gym_name': board.id}, f'{board.gym.name} 팟 생성').share().form)
             # party_card_list = list()
             # 현재 진행중인 파티 query
             # party_ing = party.objects.filter(time__gte=datetime.datetime.now() + datetime.timedelta(minutes=-5))
