@@ -215,8 +215,7 @@ class singleResponse:
             self.form['thumbnail'] = {'imageUrl': thumbnail, }
         if thumbnail_link:
             self.form['thumbnail']['link'] = {
-                'type': "WEB",
-                'webUrl': thumbnail_link
+                'web': thumbnail_link
             }
 
     def make_button(original_function):
