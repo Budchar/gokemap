@@ -213,10 +213,10 @@ class singleResponse:
             self.form["description"] = description
         if thumbnail:
             self.form['thumbnail'] = {'imageUrl': thumbnail, }
-        if thumbnail_link:
-            self.form['thumbnail']['link'] = {
-                'web': thumbnail_link
-            }
+            if thumbnail_link:
+                self.form['thumbnail']['link'] = {
+                    'web': thumbnail_link
+                }
 
     def make_button(original_function):
         @wraps(original_function)
