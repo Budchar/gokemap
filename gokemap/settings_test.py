@@ -60,7 +60,7 @@ ROOT_URLCONF = 'gokemap.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, "templates"),],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,9 +127,9 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_DIR = os.path.join(BASE_DIR, 'static') #/home/budcha/gokemap/gokemap/static
-STATICFILES_DIRS = [STATIC_DIR,]
-STATIC_ROOT = "/home/budcha/gokemap/static"
+# STATIC_DIR = os.path.join(BASE_DIR, 'static') #/home/budcha/gokemap/gokemap/static
+# STATICFILES_DIRS = [STATIC_DIR,]
+# STATIC_ROOT = "/home/budcha/gokemap/static"
 
 #leafmap setting
 #https://django-leaflet.readthedocs.io/en/latest/templates.html#spatial-extent
