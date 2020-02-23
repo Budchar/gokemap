@@ -14,10 +14,10 @@ class randomRestaurant(SkillResponseView):
         name = recommendedRestaurant.name
         description = f"{recommendedRestaurant.occasion}\n{recommendedRestaurant.place}\n{recommendedRestaurant.childCategory if recommendedRestaurant.childCategory else recommendedRestaurant.parentCategory}"
         url = recommendedRestaurant.url
-        restaurantCard = singleResponse(name, description, url, url).card()
+        restaurantCard = singleResponse(name, description).web_button("상세보기", url).card()
         positive = {"name":name, "result":1}
         negative = {"name":name, "result":-1}
-        response = skillResponse(Homebutton=False).input(restaurantCard).quickReply("다시 뽑기", "다시 뽑기", "5e46597292690d00016cb7ef").quickReply("👍","👍","5e51de30ffa7480001302067",positive).quickReply("👎","👎","5e51de30ffa7480001302067",negative)
+        response = skillResponse(Homebutton=False).input(restaurantCard).quickReply("다시 뽑기", "다시 뽑기", "5e46597292690d00016cb7ef").quickReply("👍","좋아요","5e51de30ffa7480001302067",positive).quickReply("👎","별로에요","5e51de30ffa7480001302067",negative)
         return response.default
 
 

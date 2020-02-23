@@ -259,6 +259,16 @@ class singleResponse:
         self.form['buttons'].append(template)
         return self
 
+    @make_button
+    def web_button(self, label="", url=""):
+        template = {
+            'action': 'webLink',
+            'label': label,
+            'webLinkUrl': url,
+        }
+        self.form['buttons'].append(template)
+        return self
+
     def card(self):
         return {'basicCard': self.form}
 
