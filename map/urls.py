@@ -50,4 +50,6 @@ urlpatterns = [
     # 뉴크루봇 학습
     path('fallback/', csrf_exempt(skills_learn.fallback.as_view()), name="fallback"),
     path('knowledgeplus/', csrf_exempt(skills_learn.knowledgeplus.as_view()), name="knowledgeplus"),
+    # 뉴트루봇 지식+ 호출
+    path('knowledge2plus/', skills_learnApi.knowledge2plus, name="knowledge2plus"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
