@@ -163,7 +163,7 @@ class req_rsp:
 
 
 class skillResponse:
-    def __init__(self):
+    def __init__(self, Homebutton=True):
         self.default = {
             "version": "2.0",
             "template": {
@@ -173,7 +173,8 @@ class skillResponse:
             "context": {},
             "data": {},
         }
-        self.quickReply("홈", "명령어", "명령어")
+        if Homebutton:
+            self.quickReply("홈", "명령어", "명령어")
 
     def input(self, data_list):
         self.default["template"]['outputs'].append(data_list)
@@ -194,7 +195,7 @@ class skillResponse:
             "label": label,
             "messageText": message,
             "data": {
-                "blockId": block_dict[block],
+                "blockId": block_dict[block] if block_dict.get(block, 0) else block,
             }
         }
         if extra:
@@ -263,11 +264,11 @@ class singleResponse:
 
 
 # 간단한 텍스트 아웃풋을 만드려면 simple_text를 이용하자
-def simple_text(text):
+def simple_text(text, Homebutton=True):
     '''
     간단한 텍스트 아웃풋을 생성하는 함수
     '''
-    resp = skillResponse()
+    resp = skillResponse(Homebutton)
     form = {
         "simpleText": {
             'text': text

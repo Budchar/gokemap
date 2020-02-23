@@ -191,3 +191,19 @@ class poke_move(models.Model):
     pokemon = models.ForeignKey(pokemon, on_delete=models.CASCADE)
     move = models.ForeignKey(move, on_delete=models.CASCADE)
     isLegacy = models.BooleanField(default=False)
+
+
+class restaurant(models.Model):
+    name = models.CharField(max_length=50)
+    occasion = models.CharField(max_length=20)
+    place = models.CharField(max_length=20)
+    parentCategory = models.CharField(max_length=20)
+    childCategory = models.CharField(max_length=20)
+    url = models.CharField(max_length=100)
+
+
+class ratedRestaurant(models.Model):
+    restaurant = models.ForeignKey(restaurant, on_delete=models.CASCADE)
+    user_id = models.CharField(max_length=30)
+    rating = models.CharField(max_length=10)
+    time = models.DateTimeField(auto_now=True, auto_now_add=False)
