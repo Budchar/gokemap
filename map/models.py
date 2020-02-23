@@ -204,6 +204,6 @@ class restaurant(models.Model):
 
 class ratedRestaurant(models.Model):
     restaurant = models.ForeignKey(restaurant, on_delete=models.CASCADE)
-    user_id = models.CharField(max_length=30)
+    user_id = models.CharField(max_length=100)
     rating = models.CharField(max_length=10)
     time = models.DateTimeField(auto_now=True, auto_now_add=False)
