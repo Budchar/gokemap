@@ -46,5 +46,5 @@ urlpatterns = [
     # path('party/', views.party_post, name='p_posted'),
     # 뉴크루봇 맛집
     path('/restaurant', skills_restaurant.randomRestaurant, name="restaurant"),
-    path('/restaurant_rating', skills_restaurant.ratingRestaurant, name="restaurant_rating"),
+    path('/restaurant_rating', skills_restaurant.restaurantRating, name="restaurant_rating"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
