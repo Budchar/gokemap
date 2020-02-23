@@ -238,7 +238,7 @@ class singleResponse:
             'action': 'block',
             'label': label if label else block,
             'messageText': messagetext if messagetext else block,
-            'blockId': block_dict[block],
+            'blockId': block_dict[block] if block_dict.get(block, 0) else block,
         }
         if extra:
             template['extra'] = extra

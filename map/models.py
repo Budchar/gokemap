@@ -207,3 +207,9 @@ class ratedRestaurant(models.Model):
     user_id = models.CharField(max_length=100)
     rating = models.IntegerField(default=0)
     time = models.DateTimeField(auto_now=True, auto_now_add=False)
+
+
+class knowledgePlus(models.Model):
+    user_id = models.CharField(max_length=100)
+    utterance = models.CharField(max_length=3000)
+    answer = models.CharField(max_length=3000, null=True)

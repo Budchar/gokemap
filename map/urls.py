@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.decorators.csrf import csrf_exempt
-from . import views, skills_raid, skills_user, skills_research, skills_party, skills_event, skills_pokemon, skills_chat, skills_restaurant
+from . import views, skills_raid, skills_user, skills_research, skills_party, skills_event, skills_pokemon, skills_chat, skills_restaurant, skills_learn
 
 app_name = 'map'
 urlpatterns = [
@@ -47,4 +47,7 @@ urlpatterns = [
     # 뉴크루봇 맛집
     path('restaurant/', csrf_exempt(skills_restaurant.randomRestaurant.as_view()), name="restaurant"),
     path('restaurant_rating/', csrf_exempt(skills_restaurant.restaurantRating.as_view()), name="restaurant_rating"),
+    # 뉴크루봇 학습
+    path('fallback/', csrf_exempt(skills_learn.fallback.as_view()), name="fallback"),
+    path('knowledgeplus/', csrf_exempt(skills_learn.knowledgeplus.as_view()), name="knowledgeplus"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

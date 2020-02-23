@@ -12,7 +12,7 @@ class randomRestaurant(SkillResponseView):
         name = recommendedRestaurant.name
         good = ratedRestaurant.objects.filter(restaurant=recommendedRestaurant, rating=1).aggregate(Sum('rating'))['rating__sum']
         bad = ratedRestaurant.objects.filter(restaurant=recommendedRestaurant, rating=-1).aggregate(Sum('rating'))['rating__sum']
-        description = f"{recommendedRestaurant.occasion.strip()}  / 👍: {good if good else 0} / 👎: {abs(bad) if bad else 0}\n{recommendedRestaurant.place.strip()}\n{recommendedRestaurant.childCategory.strip() if recommendedRestaurant.childCategory else recommendedRestaurant.parentCategory.strip()}"
+        description = f"{recommendedRestaurant.occasion.strip()} / 👍: {good if good else 0} / 👎: {abs(bad) if bad else 0}\n{recommendedRestaurant.place.strip()}\n{recommendedRestaurant.childCategory.strip() if recommendedRestaurant.childCategory else recommendedRestaurant.parentCategory.strip()}"
         url = recommendedRestaurant.url
         restaurantCard = singleResponse(name, description).web_button("상세보기", url).card()
         positive = {"name":name, "result":1}
@@ -29,5 +29,5 @@ class restaurantRating(SkillResponseView):
             Restaurant = restaurant.objects.filter(name=extra['name']).first()
             ratedRestaurant.objects.create(restaurant=Restaurant, user_id=user, rating=extra["result"])
             return simple_text(f"{extra['name']}을 평가해주셔서 감사합니다.", False)
-        else: 
-            return simple_text("시스템 오류입니다. joel.e에게 알려주세요!", False)
+        else:
+            return simple_text(f"시스템 오류입니다. joel.e에게 알려주세요!", False)
