@@ -11,7 +11,7 @@ class fallback(SkillResponseView):
         user = request.user_id
         utterance = request.received_json_data['userRequest']['utterance']
         extra = {"user":user,"utterance":utterance}
-        knowledgePlus.object.create(user_id=user,utterance=utterance)
+        knowledgePlus.objects.create(user_id=user,utterance=utterance)
         restaurantCard = singleResponse(description=description).web_button("의견남기기", url).block_button("5e521c158192ac0001584b32", extra, "뉴크루봇에게 알려주기", "뉴크루봇에게 알려주기").card()
         response = skillResponse(Homebutton=False).input(restaurantCard).quickReply("🏠홈", "🏠홈", "5e438314ffa7480001f94123")
         return response.default
