@@ -45,6 +45,6 @@ urlpatterns = [
     # path('posted/', views.raid_post, name='posted'),
     # path('party/', views.party_post, name='p_posted'),
     # 뉴크루봇 맛집
-    path('restaurant/', skills_restaurant.randomRestaurant, name="restaurant"),
-    path('restaurant_rating/', skills_restaurant.restaurantRating, name="restaurant_rating"),
+    path('restaurant/', csrf_exempt(skills_restaurant.randomRestaurant.as_view()), name="restaurant"),
+    path('restaurant_rating/', csrf_exempt(skills_restaurant.restaurantRating.as_view()), name="restaurant_rating"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
