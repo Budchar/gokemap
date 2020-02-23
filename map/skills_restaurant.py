@@ -18,7 +18,7 @@ class randomRestaurant(SkillResponseView):
         positive = {"name":name, "result":1}
         negative = {"name":name, "result":-1}
         response = skillResponse(Homebutton=False).input(restaurantCard).quickReply("다시 뽑기", "다시 뽑기", "5e46597292690d00016cb7ef").quickReply("👍","👍","5e51de30ffa7480001302067",positive).quickReply("👎","👎","5e51de30ffa7480001302067",negative)
-        return response
+        return response.default
 
 
 class restaurantRating(SkillResponseView):
