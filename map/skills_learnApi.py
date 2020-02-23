@@ -11,7 +11,7 @@ def knowledge2plus(request):
     valueList = list()
     knowObjects = knowledgePlus.objects.filter(answer__isnull=False)
     for i, know in enumerate(knowObjects):
-        valueList.append([i, "", "", "", "", "", know.utterance, know.answer, "", ""])
+        valueList.append([i+1, "", "", "", "", "", know.utterance, know.answer, "", ""])
     response = {
         "values": valueList,
         "name": "뉴크루지식더하기",
