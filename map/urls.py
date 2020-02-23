@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.decorators.csrf import csrf_exempt
-from . import views, skills_raid, skills_user, skills_research, skills_party, skills_event, skills_pokemon, skills_chat, skills_restaurant, skills_learn
+from . import views, skills_raid, skills_user, skills_research, skills_party, skills_event, skills_pokemon, skills_chat, skills_restaurant, skills_learn, skills_learnApi
 
 app_name = 'map'
 urlpatterns = [
