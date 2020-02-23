@@ -1,7 +1,5 @@
 import json, random
-from django.http import JsonResponse
-from django.db.models import Sum
-from django.views.decorators.csrf import csrf_exempt
+
 from .models import restaurant, ratedRestaurant
 from .skills import req_rsp, skillResponse, singleResponse, simple_text, SkillResponseView
 
@@ -25,8 +23,9 @@ class restaurantRating(SkillResponseView):
     def make_response(self, request):
         user = request.user_id
         extra = request.client_data()
-        Restaurant = restaurant.objects.filter(name=extra['name'])
-        ratedRestaurant.objects.create(restaurant=Restaurant, user_id=user, rating=str(extra["result"]))
-        return simple_text(f"{extra['name']}을 평가해주셔서 감사합니다.", False)
-
-            
+        if extra:
+            Restaurant = restaurant.objects.filter(name=extra['name'])
+            ratedRestaurant.objects.create(restaurant=Restaurant, user_id=user, rating=str(extra["result"]))
+            return simple_text(f"{extra['name']}을 평가해주셔서 감사합니다.", False)
+        else: 
+            return simple_text("시스템 오류입니다. joel.e에게 알려주세요!", False)

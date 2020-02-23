@@ -194,12 +194,10 @@ class skillResponse:
             "action": "block",
             "label": label,
             "messageText": message,
-            "data": {
-                "blockId": block_dict[block] if block_dict.get(block, 0) else block,
-            }
+            "blockId": block_dict[block] if block_dict.get(block, 0) else block,
         }
         if extra:
-            template['data']['extra'] = extra
+            template['extra'] = extra
         self.default["template"]["quickReplies"].append(template)
         return self
 
