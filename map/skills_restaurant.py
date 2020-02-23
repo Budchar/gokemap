@@ -24,7 +24,7 @@ class restaurantRating(SkillResponseView):
         user = request.user_id
         extra = request.client_data()
         if extra:
-            Restaurant = restaurant.objects.filter(name=extra['name'])
+            Restaurant = restaurant.objects.filter(name=extra['name']).first()
             ratedRestaurant.objects.create(restaurant=Restaurant, user_id=user, rating=str(extra["result"]))
             return simple_text(f"{extra['name']}을 평가해주셔서 감사합니다.", False)
         else: 
