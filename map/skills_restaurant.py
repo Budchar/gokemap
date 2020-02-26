@@ -6,8 +6,7 @@ from .skills import req_rsp, skillResponse, singleResponse, simple_text, SkillRe
 
 class randomRestaurant(SkillResponseView):
     def make_response(self, request):
-        print(request.params)
-        restaurant_obj = restaurant.objects.all()
+        restaurant_obj = restaurant.objects.filter(occasion__contains="식사")
         recommendedRestaurant = random.choice(restaurant_obj)
         name = recommendedRestaurant.name
         good = ratedRestaurant.objects.filter(restaurant=recommendedRestaurant, rating=1).aggregate(Sum('rating'))['rating__sum']
@@ -27,7 +26,11 @@ class restaurantRating(SkillResponseView):
         extra = request.client_data()
         if extra:
             Restaurant = restaurant.objects.filter(name=extra['name']).first()
-            ratedRestaurant.objects.create(restaurant=Restaurant, user_id=user, rating=extra["result"])
-            return simple_text(f"{extra['name']}을 평가해주셔서 감사합니다.", False)
+            result = extra["result"]
+            ratedRestaurant.objects.create(restaurant=Restaurant, user_id=user, rating=result)
+            if result == 1:
+                return simple_text(f"맛있는 식사 되셨나요? {extra['name']}을(를) 평가해주셔서 감사해요!", False)
+            elif result == -1:
+                return simple_text(f"식사가 별로였다니!😢 참고해서 더 좋은 맛집을 추천해드릴게요!", False)
         else:
             return simple_text(f"시스템 오류입니다. joel.e에게 알려주세요!", False)
