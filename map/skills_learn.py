@@ -22,6 +22,6 @@ class knowledgeplus(SkillResponseView):
         extra = request.client_data()
         user = extra['user']
         utterance = extra['utterance']
-        answer = request.params['answer']['origin']
+        answer = str(request.params['answer']['origin'])
         knowObject, created = knowledgePlus.objects.update_or_create(user_id=user,utterance=utterance,answer=answer)
         return skillResponse(Homebutton=False).input(singleResponse(description="알려주셔서 감사합니다!").card()).quickReply("🏠홈", "🏠홈", "5e438314ffa7480001f94123").default
